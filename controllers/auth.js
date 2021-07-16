@@ -169,13 +169,20 @@ exports.login = (req, res) => {
   console.log("in login route");
   const username = req.body.email;
   const password = req.body.password;
+  console.log(username);
+  console.log(password);
   User.findOne({ email: username }, function (err, foundUser) {
+    console.log("inside find");
     if (err || !foundUser) {
+      console.log("error",err);
       return res.status(400).json({
         error: err || "User not found",
       });
-    } else {
+    }
+     else {
+       console.log("else case");
       if (foundUser) {
+        // console.log("found user",foundUser);
         bcrypt.compare(password, foundUser.password, function (err, result) {
           if (result === true) {
             const token = jwt.sign(
@@ -183,7 +190,7 @@ exports.login = (req, res) => {
               process.env.SECRET_KEY
             );
             // console.log(typeof token);
-            res.cookie("hii", "hiiia");
+            // res.cookie("hii", "hiiia");
             console.log(req.cookies);
             // res.cookie("token", token);
 
@@ -202,7 +209,7 @@ exports.login = (req, res) => {
             // return res.send("sending response");
 
             // req.profile = foundUser;
-
+            console.log("returning ");
             return res.send({
               token,
               cookies: res.cookies,
