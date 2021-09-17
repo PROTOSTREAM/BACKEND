@@ -2,10 +2,6 @@ const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Schema;
 
 const ideaSchema = mongoose.Schema({
-  IdeaRefNo: {
-    type: Number,
-    default: NULL,
-  },
   Review: {
     type: String,
     default: NULL,
@@ -14,12 +10,12 @@ const ideaSchema = mongoose.Schema({
     type: Number,
     default: NULL,
   },
-  StudentRefNo: { type: Number, required: true },
-  MentorRefNo: { type: Number, required: true },
+  StudentRefNo: { type: ObjectId, ref: ["User"] },
+  MentorRefNo: { type: ObjectId, ref: ["Mentor"] },
   SlotNo: { type: Number },
-  IdeaDetailUnderReview: { type: String, default: NULL },
+  IdeaDetailUnderReview: {},
   TrlLevel: { type: Number, default: NULL },
   SchemeReadiness: { type: Number, defualt: NULL },
 });
 
-module.exportsi = mongoose.model("Idea", ideaSchema);
+module.exports = mongoose.model("Idea", ideaSchema);
