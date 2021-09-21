@@ -3,9 +3,9 @@ const { ObjectId } = mongoose.Schema;
 
 const mentorSchema = mongoose.Schema({
   MentorRefId: { type: Number, required: true },
-  Name: { type: String, required: true },
+  Department: { type: String, required: true },
   Email: { type: String, required: true },
-  Status: { type: Number, default: NULL },
+  NAME: { type: Number, default: NULL },
   Mentorship: { type: ObjectId, ref: ["Idea"] },
   ListOfIdeas: { type: ObjectId, ref: ["Idea"] },
 });

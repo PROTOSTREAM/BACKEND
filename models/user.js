@@ -4,12 +4,14 @@ const { ObjectId } = mongoose.Schema;
 
 const userSchema = new mongoose.Schema(
   {
-    phonestatus:{
+    TRL_Test: { type: Number, default: 0 },
+
+    phonestatus: {
       type: String,
       required: false,
       default: "Not-verify",
     },
-    sid:{
+    sid: {
       type: String,
       required: false,
       default: null,
@@ -91,8 +93,8 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
   },
-  
-  { timestamps: true },
+
+  { timestamps: true }
 );
 
 module.exports = new mongoose.model("User", userSchema);
