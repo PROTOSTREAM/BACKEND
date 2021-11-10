@@ -2,10 +2,69 @@ const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Schema;
 
 const tbiSchema = mongoose.Schema({
-  name: { type: String, default: "TBI" },
-  email: String,
-  listOfIdeas: { type: ObjectId, ref: ["Ideas"] },
-  password: String,
-});
+  
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 3,
+    },
+   
+    profiledata: {},
+    role: {
+      type: Number,
+      required: true,
+    },
+    // hackathons: [
+    //   {
+    //     type: ObjectId,
+    //     ref: "Hackathon",
+    //   },
+    // ],
+    // innotechs: [
+    //   {
+    //     type: ObjectId,
+    //     ref: "Innotech",
+    //   },
+    // ],
+    // schemes: [
+    //   {
+    //     type: ObjectId,
+    //     ref: "Scheme",
+    //   },
+    // ],
+    // startups: [
+    //   {
+    //     type: ObjectId,
+    //     ref: "Startup",
+    //   },
+    // ],
+    // internship: [
+    //   {
+    //     type: ObjectId,
+    //     ref: "Internship",
+    //   },
+    // ],
+    // ndas: [
+    //   {
+    //     type: ObjectId,
+    //     ref: "Nda",
+    //   },
+    // ],
+    number: {
+      type: Number,
+      required: true,
+    },
+  },
+
+ 
+  // listOfIdeas: { type: ObjectId, ref: ["Ideas"] },
+
+  { timestamps: true }
+);
 
 module.exports = mongoose.model("Tbi", tbiSchema);

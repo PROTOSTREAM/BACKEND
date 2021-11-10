@@ -1,5 +1,6 @@
 require("dotenv").config();
 const User = require("../models/user");
+const TbiUser = require("../models/tbi");
 const mongoose = require("mongoose");
 const expressJwt = require("express-jwt");
 
@@ -13,11 +14,19 @@ const { VideoGrant } = require("twilio/lib/jwt/AccessToken");
 exports.register = (req, res) => {
   console.log("inside register");
   console.log(req.body);
-  emails = ["vineet.sharma@kiet.edu", "hod.verma@kiet.edu"];
-
-  let regx = /^([a-z]+)(\.)([0-9]{4})([a-z]{2})([0-9]{4})(@)(kiet)(\.)(edu)$/;
-  let tbiregx = /^([a-z]+)(\.)([a-z]+)(@)(kiet)(\.)(edu)$/;
-
+  mentor_emails = ["vineet.sharma@kiet.edu", "hod.verma@kiet.edu"];
+  const tbi_emails=[
+    "tbi1@kiet.edu","tbi2@kiet.edu","tbi3@kiet.edu","tbi4@kiet.edu"
+  ];
+  
+  const regx = /^([a-z]+)(\.)([0-9]{4})([a-z]{2})([0-9]{4})(@)(kiet)(\.)(edu)$/;
+  const tbiregx = /^(tbi)([0-9]{1})(@)(kiet)(\.)(edu)$/;
+  console.log(tbi_emails[0]);
+  console.log(req.body.email);
+  if(tbi_emails[0]===req.body.email){
+    console.log("true");
+  }
+  console.log(tbi_emails.includes(req.body.email));
   if (regx.test(req.body.email) || tbiregx.test(req.body.email)) {
     if (regx.test(req.body.email)) {
       let testemail = req.body.email;
@@ -92,22 +101,23 @@ exports.register = (req, res) => {
       });
     } else if (
       tbiregx.test(req.body.email) &&
-      emails.includes(req.body.email)
+      tbi_emails.includes(req.body.email)
     ) {
+      console.log("inside");
       let testemail = req.body.email;
-      let data = _.capitalize(testemail).split(".");
+      let data = _.capitalize(testemail).split("@");
       let proname = data[0];
-      let prosurname = data[1].split("@")[0];
       let profiledata = {
-        Profilename: proname + " " + prosurname,
+        Profilename: proname,
       };
-      User.findOne({ email: req.body.email }, function (err, foundUser) {
+      console.log(profiledata);
+      TbiUser.findOne({ email: req.body.email }, function (err, foundUser) {
         // console.log("[Found User]",foundUser);
         if (foundUser) {
           return res.json({ error: "Email already registered" });
         } else {
           bcrypt.hash(req.body.password, saltRounds, function (err, hash) {
-            const newUser = new User({
+            const newUser = new TbiUser({
               email: req.body.email,
               password: hash,
               profiledata: profiledata,
@@ -125,13 +135,9 @@ exports.register = (req, res) => {
                 res.cookie("token", token, { expire: new Date() + 7 });
                 const {
                   _id,
-                  projects,
-                  hackathons,
-                  schemes,
                   email,
                   profiledata,
                   role,
-                  phonestatus,
                   number,
                 } = savedUser;
 
@@ -139,14 +145,10 @@ exports.register = (req, res) => {
                   token,
                   cookies: res.cookies,
                   user: {
-                    _id,
-                    projects,
-                    hackathons,
-                    email,
-                    schemes,
+                    _id,              
+                    email,                  
                     profiledata,
                     role,
-                    phonestatus,
                     number,
                   },
                 });
@@ -166,13 +168,81 @@ exports.register = (req, res) => {
 };
 
 exports.login = (req, res) => {
+  const regx = /^([a-z]+)(\.)([0-9]{4})([a-z]{2})([0-9]{4})(@)(kiet)(\.)(edu)$/;
+  const tbiregx = /^(tbi)([0-9]{1})(@)(kiet)(\.)(edu)$/;
   console.log("in login route");
   const username = req.body.email;
   const password = req.body.password;
   console.log(username);
   console.log(password);
-  User.findOne({ email: username }, function (err, foundUser) {
-    console.log("inside find");
+  if(regx.test(req.body.email)){
+    User.findOne({ email: username }, function (err, foundUser) {
+      console.log("inside User find");
+      if (err || !foundUser) {
+        console.log("error",err);
+        return res.status(400).json({
+          error: err || "User not found",
+        });
+      }
+      else {
+        console.log("else case");
+        if (foundUser) {
+          // console.log("found user",foundUser);
+          bcrypt.compare(password, foundUser.password, function (err, result) {
+            if (result === true) {
+              const token = jwt.sign(
+                { _id: foundUser._id },
+                process.env.SECRET_KEY
+              );
+              // console.log(typeof token);
+              // res.cookie("hii", "hiiia");
+              console.log(req.cookies);
+              // res.cookie("token", token);
+
+              const {
+                _id,
+                projects,
+                hackathons,
+                schemes,
+                email,
+                profiledata,
+                role,
+                number,
+                phonestatus,
+              } = foundUser;
+              // console.log(res.headers);
+              // return res.send("sending response");
+
+              // req.profile = foundUser;
+              console.log("returning ");
+              return res.send({
+                token,
+                cookies: res.cookies,
+                user: {
+                  _id,
+                  projects,
+                  hackathons,
+                  email,
+                  schemes,
+                  profiledata,
+                  role,
+                  number,
+                  phonestatus,
+                },
+              });
+            } else {
+              return res.status(401).json({
+                error: "Email or password do not match",
+              });
+            }
+          });
+        }
+      }
+    });
+  }
+  else if(tbiregx.test(req.body.email)){
+     TbiUser.findOne({ email: username }, function (err, foundUser) {
+    console.log("inside TBI find");
     if (err || !foundUser) {
       console.log("error",err);
       return res.status(400).json({
@@ -195,15 +265,11 @@ exports.login = (req, res) => {
             // res.cookie("token", token);
 
             const {
-              _id,
-              projects,
-              hackathons,
-              schemes,
+              _id,           
               email,
               profiledata,
               role,
               number,
-              phonestatus,
             } = foundUser;
             // console.log(res.headers);
             // return res.send("sending response");
@@ -215,14 +281,10 @@ exports.login = (req, res) => {
               cookies: res.cookies,
               user: {
                 _id,
-                projects,
-                hackathons,
                 email,
-                schemes,
                 profiledata,
                 role,
                 number,
-                phonestatus,
               },
             });
           } else {
@@ -234,6 +296,12 @@ exports.login = (req, res) => {
       }
     }
   });
+  }
+  else{
+    return res.status(401).json({
+              error: "Outsider not allowed",
+            });
+  }
 };
 
 exports.logout = (req, res) => {
