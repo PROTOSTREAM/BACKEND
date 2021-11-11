@@ -1,6 +1,7 @@
 require("dotenv").config();
 const User = require("../models/user");
 const TbiUser = require("../models/tbi");
+const MentorUser = require("../models/mentors")
 const mongoose = require("mongoose");
 const expressJwt = require("express-jwt");
 
@@ -11,27 +12,30 @@ const saltRounds = 10;
 var _ = require("lodash");
 const { VideoGrant } = require("twilio/lib/jwt/AccessToken");
 
-exports.register = (req, res) => {
-  console.log("inside register");
-  console.log(req.body);
-  const mentor_emails ={
-    CSE:[],
-    CS:[],
-    IT:[],
+const regx = /^([a-z]+)(\.)([0-9]{4})([a-z]{2,4})([0-9]{4})(@)(kiet)(\.)(edu)$/;
+const tbiregx = /^(tbi)([0-9]{1})(@)(kiet)(\.)(edu)$/;
+const mentorRegx = /^([a-z]+)(\.)([a-z]{2,4})(@)(kiet)(\.)(edu)$/;
+
+const mentor_emails ={
+    CSE:["mentora.cse@kiet.edu","mentorb.cse@kiet.edu","mentorc.cse@kiet.edu"],
+    CS:["mentora.cs@kiet.edu","mentorb.cs@kiet.edu","mentorc.cs@kiet.edu"],
+    IT:["mentora.it@kiet.edu","mentorb.it@kiet.edu","mentorc.it@kiet.edu"],
+    CSIT:["mentora.csit@kiet.edu","mentorb.csit@kiet.edu","mentorc.csit@kiet.edu"],
+    EEE:["mentora.eee@kiet.edu","mentorb.eee@kiet.edu","mentorc.eee@kiet.edu"],
+    ECE:["mentora.ece@kiet.edu","mentorb.ece@kiet.edu","mentorc.ece@kiet.edu"],
+    ME:["mentora.me@kiet.edu","mentorb.me@kiet.edu","mentorc.me@kiet.edu"],
+    CE:["mentora.ce@kiet.edu","mentorb.ce@kiet.edu","mentorc.ce@kiet.edu"],
+    MCA:["mentora.mca@kiet.edu","mentorb.mca@kiet.edu","mentorc.mca@kiet.edu"],
+    MBA:["mentora.mba@kiet.edu","mentorb.mba@kiet.edu","mentorc.mba@kiet.edu"]
   };
   const tbi_emails=[
     "tbi1@kiet.edu","tbi2@kiet.edu","tbi3@kiet.edu","tbi4@kiet.edu"
   ];
-  
-  const regx = /^([a-z]+)(\.)([0-9]{4})([a-z]{2,4})([0-9]{4})(@)(kiet)(\.)(edu)$/;
-  const tbiregx = /^(tbi)([0-9]{1})(@)(kiet)(\.)(edu)$/;
-  console.log(tbi_emails[0]);
-  console.log(req.body.email);
-  if(tbi_emails[0]===req.body.email){
-    console.log("true");
-  }
-  console.log(tbi_emails.includes(req.body.email));
-  if (regx.test(req.body.email) || tbiregx.test(req.body.email)) {
+
+
+exports.register = (req, res) => {
+  console.log("inside register");
+  if (regx.test(req.body.email) || tbiregx.test(req.body.email) || mentorRegx.test(req.body.email)) {
     if (regx.test(req.body.email)) {
       let testemail = req.body.email;
       let data = _.capitalize(testemail).split(".");
@@ -103,7 +107,8 @@ exports.register = (req, res) => {
           });
         }
       });
-    } else if (
+    } 
+    else if (
       tbiregx.test(req.body.email) &&
       tbi_emails.includes(req.body.email)
     ) {
@@ -166,14 +171,80 @@ exports.register = (req, res) => {
         }
       });
     }
+    else if (
+      mentorRegx.test(req.body.email) &&
+      mentor_emails[req.body.branch].includes(req.body.email)
+    ) {
+      console.log("inside mentor signup");
+      let testemail = req.body.email;
+      let data = _.capitalize(testemail).split(".");
+      let proname = data[0];
+      let branch = data[1].split("@")[0];
+      let profiledata = {
+        Profilename: proname,
+      };
+      console.log(profiledata);
+      MentorUser.findOne({ email: req.body.email }, function (err, foundUser) {
+        // console.log("[Found User]",foundUser);
+        if (foundUser) {
+          return res.json({ error: "Email already registered" });
+        } else {
+          bcrypt.hash(req.body.password, saltRounds, function (err, hash) {
+            const newUser = new MentorUser({
+              email: req.body.email,
+              password: hash,
+              profiledata: profiledata,
+              role: 3,
+              department: branch,
+              number: req.body.number,
+            });
+
+            newUser.save(function (err, savedUser) {
+              // console.log("[SavedUser]",savedUser);
+              if (!err) {
+                const token = jwt.sign(
+                  { _id: newUser._id },
+                  process.env.SECRET_KEY
+                );
+                res.cookie("token", token, { expire: new Date() + 7 });
+                const {
+                  _id,
+                  email,
+                  profiledata,
+                  role,
+                  department,
+                  number,
+                } = savedUser;
+
+                return res.send({
+                  token,
+                  cookies: res.cookies,
+                  user: {
+                    _id,              
+                    email,                  
+                    profiledata,
+                    department,
+                    role,
+                    number,
+                  },
+                });
+              } else {
+                return res.status(400).json({
+                  error: err,
+                });
+              }
+            });
+          });
+        }
+      });
+    }
   } else {
     return res.status(400).json("Invalid Email id");
   }
 };
 
 exports.login = (req, res) => {
-  const regx = /^([a-z]+)(\.)([0-9]{4})([a-z]{2,4})([0-9]{4})(@)(kiet)(\.)(edu)$/;
-  const tbiregx = /^(tbi)([0-9]{1})(@)(kiet)(\.)(edu)$/;
+  
   console.log("in login route");
   const username = req.body.email;
   const password = req.body.password;
@@ -301,6 +372,65 @@ exports.login = (req, res) => {
     }
   });
   }
+  else if(mentorRegx.test(req.body.email)){
+     MentorUser.findOne({ email: username }, function (err, foundUser) {
+    console.log("inside MENTOR find");
+    if (err || !foundUser) {
+      console.log("error",err);
+      return res.status(400).json({
+        error: err || "User not found",
+      });
+    }
+     else {
+       console.log("else case");
+      if (foundUser) {
+        // console.log("found user",foundUser);
+        bcrypt.compare(password, foundUser.password, function (err, result) {
+          if (result === true) {
+            const token = jwt.sign(
+              { _id: foundUser._id },
+              process.env.SECRET_KEY
+            );
+            // console.log(typeof token);
+            // res.cookie("hii", "hiiia");
+            console.log(req.cookies);
+            // res.cookie("token", token);
+
+            const {
+              _id,           
+              email,
+              profiledata,
+              role,
+              department,
+              number,
+            } = foundUser;
+            // console.log(res.headers);
+            // return res.send("sending response");
+
+            // req.profile = foundUser;
+            console.log("returning ");
+            return res.send({
+              token,
+              cookies: res.cookies,
+              user: {
+                _id,
+                email,
+                profiledata,
+                role,
+                department,
+                number,
+              },
+            });
+          } else {
+            return res.status(401).json({
+              error: "Email or password do not match",
+            });
+          }
+        });
+      }
+    }
+  });
+  }
   else{
     return res.status(401).json({
               error: "Outsider not allowed",
@@ -338,7 +468,7 @@ exports.isAuthenticated = (req, res, next) => {
 
 exports.isAdmin = (req, res, next) => {
   // console.log(req.profile);
-  if (req.profile.role === 3) {
+  if (req.profile.role === 1) {
     next();
   } else {
     return res.status(403).json({
@@ -353,6 +483,16 @@ exports.isTBI = (req, res, next) => {
   } else {
     return res.status(403).json({
       error: "You are not TBI Member, Access Denied",
+    });
+  }
+};
+
+exports.isMENTOR = (req, res, next) => {
+  if (req.profile.role === 3) {
+    next();
+  } else {
+    return res.status(403).json({
+      error: "You are not Mentor, Access Denied",
     });
   }
 };
