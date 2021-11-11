@@ -14,12 +14,16 @@ const { VideoGrant } = require("twilio/lib/jwt/AccessToken");
 exports.register = (req, res) => {
   console.log("inside register");
   console.log(req.body);
-  mentor_emails = ["vineet.sharma@kiet.edu", "hod.verma@kiet.edu"];
+  const mentor_emails ={
+    CSE:[],
+    CS:[],
+    IT:[],
+  };
   const tbi_emails=[
     "tbi1@kiet.edu","tbi2@kiet.edu","tbi3@kiet.edu","tbi4@kiet.edu"
   ];
   
-  const regx = /^([a-z]+)(\.)([0-9]{4})([a-z]{2})([0-9]{4})(@)(kiet)(\.)(edu)$/;
+  const regx = /^([a-z]+)(\.)([0-9]{4})([a-z]{2,4})([0-9]{4})(@)(kiet)(\.)(edu)$/;
   const tbiregx = /^(tbi)([0-9]{1})(@)(kiet)(\.)(edu)$/;
   console.log(tbi_emails[0]);
   console.log(req.body.email);
@@ -168,7 +172,7 @@ exports.register = (req, res) => {
 };
 
 exports.login = (req, res) => {
-  const regx = /^([a-z]+)(\.)([0-9]{4})([a-z]{2})([0-9]{4})(@)(kiet)(\.)(edu)$/;
+  const regx = /^([a-z]+)(\.)([0-9]{4})([a-z]{2,4})([0-9]{4})(@)(kiet)(\.)(edu)$/;
   const tbiregx = /^(tbi)([0-9]{1})(@)(kiet)(\.)(edu)$/;
   console.log("in login route");
   const username = req.body.email;
