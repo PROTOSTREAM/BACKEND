@@ -13,7 +13,7 @@ const MentorUser = require("../models/mentors");
 // };
 
 
-exports.getUserById = (req, res, next, id) => {
+exports.getMentorUserById = (req, res, next, id) => {
   // console.log("in getUserById");
   // console.log(id);
   MentorUser.findById(id).exec((err, user) => {
@@ -27,7 +27,7 @@ exports.getUserById = (req, res, next, id) => {
   });
 };
 
-exports.getUser = (req, res) => {
+exports.getMentorUser = (req, res) => {
   req.profile.password = undefined;
   return res.json(req.profile);
 };

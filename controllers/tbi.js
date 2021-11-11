@@ -1,6 +1,6 @@
 const TbiUser = require("../models/tbi");
 
-exports.getUserById = (req, res, next, id) => {
+exports.getTbiUserById = (req, res, next, id) => {
   // console.log("in getUserById");
   // console.log(id);
   TbiUser.findById(id).exec((err, user) => {
@@ -14,7 +14,7 @@ exports.getUserById = (req, res, next, id) => {
   });
 };
 
-exports.getUser = (req, res) => {
+exports.getTbiUser = (req, res) => {
   req.profile.password = undefined;
   return res.json(req.profile);
 };

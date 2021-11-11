@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Schema;
 
 const VerifyIdeaSchema = mongoose.Schema({
-  verify: { default: NULL, type: String },
-  comment: { default: NULL, type: String },
+  verify: { default: undefined, type: String },
+  comment: { default: undefined, type: String },
   photo: Buffer,
   Gender: String,
   Aadhar: Number,

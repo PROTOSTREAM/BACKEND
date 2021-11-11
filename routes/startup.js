@@ -101,76 +101,95 @@ const multerStorage = multer.diskStorage({
 const upload = multer({ storage: multerStorage });
 
 const { getUserById, getUser } = require("../controllers/user");
-const { isSignedIn, isAuthenticated, isTBI } = require("../controllers/auth");
-const {
-  createNewStartup,
-  readytoRegister,
-  getStartupById,
-  otplogin,
-  otpverify,
-  isSens,
-  ndaUpload,
-  findAllUserNdas,
-  findAllNdas,
-  getNda,
-  getNdaById,
-  verifyNda,
-  isNdaVerify,
-  internship,
-  findAllStartups,
-} = require("../controllers/startup");
+const { getMentorUserById, getMentorUser } = require("../controllers/mentors");
+const { getTbiUserById, getTbiUser } = require("../controllers/tbi");
 
-const { createNewInternship } = require("../controllers/internship");
+const { isSignedIn, isAuthenticated, isTBI, isMENTOR} = require("../controllers/auth");
+
+const {
+getTrlValues,
+updateTrlValues,
+createIdea,
+getIdeaOfUser,
+} = require("../controllers/Idea");
+// const {
+//   createNewStartup,
+//   readytoRegister,
+//   getStartupById,
+//   otplogin,
+//   otpverify,
+//   isSens,
+//   ndaUpload,
+//   findAllUserNdas,
+//   findAllNdas,
+//   getNda,
+//   getNdaById,
+//   verifyNda,
+//   isNdaVerify,
+//   internship,
+//   findAllStartups,
+// } = require("../controllers/startup");
+
+
+
+//const { createNewInternship } = require("../controllers/internship");
 
 const router = express.Router();
 
 router.param("userId", getUserById);
-router.param("startupId", getStartupById);
-router.param("ndaId", getNdaById);
+router.param("tbiId", getTbiUserById);
+router.param("mentorId",getMentorUserById);
+//router.param("startupId", getStartupById);
+//router.param("ndaId", getNdaById);
 
-router.use("/startup/createinternship/", isSens);
+//router.use("/startup/createinternship/", isSens);
 
 // SENS ROUTES
-router.get("/startup/:userId", isSignedIn, readytoRegister);
-router.get("/startup/register/:userId", isSignedIn, otplogin);
-router.post("/startup/verify/:userId", isSignedIn, otpverify);
-router.post(
-  "/startup/nda/upload/:userId",
-  upload.single("uploadnda"),
-  isSens,
-  isSignedIn,
-  ndaUpload
-);
+// router.get("/startup/:userId", isSignedIn, readytoRegister);
+// router.get("/startup/register/:userId", isSignedIn, otplogin);
+// router.post("/startup/verify/:userId", isSignedIn, otpverify);
+// router.post(
+//   "/startup/nda/upload/:userId",
+//   upload.single("uploadnda"),
+//   isSens,
+//   isSignedIn,
+//   ndaUpload
+// );
 
-router.get("/startups/allstartups/:userId", findAllStartups);
+//router.get("/startups/allstartups/:userId", findAllStartups);
 
 // REGISTER ROUTES
-router.post(
-  "/createstartup/:ndaId/:userId",
-  upload.single("presentation"),
-  isSens,
-  isNdaVerify,
-  isSignedIn,
-  createNewStartup
-);
+// router.post(
+//   "/createstartup/:ndaId/:userId",
+//   upload.single("presentation"),
+//   isSens,
+//   isNdaVerify,
+//   isSignedIn,
+//   createNewStartup
+// );
 // router.post("/createstartup/:userId",upload.single('presentation'),
 //             // isSens,
 //             // isNdaVerify,
 //             isSignedIn,
 //             createNewStartup,
 // );                                                         // 2ND TEST REMAINS WITH isNdaVerify and :ndaId
-router.post(
-  "/register/internship/:startupId/:userId",
-  isSignedIn,
-  isSens,
-  createNewInternship
-); //NOT TESTED
+// router.post(
+//   "/register/internship/:startupId/:userId",
+//   isSignedIn,
+//   isSens,
+//   createNewInternship
+// ); //NOT TESTED
 
-router.get("/myndas/:userId", isSignedIn, findAllUserNdas); //NOT TESTED
+//router.get("/myndas/:userId", isSignedIn, findAllUserNdas); //NOT TESTED
 
 //TBI ROUTES
-router.post("/ndalist/:userId", isSignedIn, isTBI, findAllNdas); //NOT TESTED
-router.post("/nda/:ndaId/:userId", isSignedIn, isTBI, getNda); //NOT TESTED
-router.patch("/verifynda/:ndaId/:userId", isSignedIn, isTBI, verifyNda); //NOT TESTED
+//router.post("/ndalist/:userId", isSignedIn, isTBI, findAllNdas); //NOT TESTED
+//router.post("/nda/:ndaId/:userId", isSignedIn, isTBI, getNda); //NOT TESTED
+//router.patch("/verifynda/:ndaId/:userId", isSignedIn, isTBI, verifyNda); //NOT TESTED
+
+router.get("/getTrl/:userId", getTrlValues);
+router.post("/updateTrl/:userId", updateTrlValues);
+router.post("/createIdea/:userId", createIdea);
+router.get("/getIdea/:userId", getIdeaOfUser);
 
 module.exports = router;

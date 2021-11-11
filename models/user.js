@@ -4,8 +4,7 @@ const { ObjectId } = mongoose.Schema;
 
 const userSchema = new mongoose.Schema(
   {
-    TRL_Test: { type: Number, default: 0 },
-
+    TRL_Test: { type: String, default: undefined },
     phonestatus: {
       type: String,
       required: false,
@@ -70,22 +69,14 @@ const userSchema = new mongoose.Schema(
         ref: "Scheme",
       },
     ],
-    startups: [
-      {
+    startup: {
         type: ObjectId,
-        ref: "Startup",
-      },
-    ],
+        ref: "Idea",
+    },
     internship: [
       {
         type: ObjectId,
         ref: "Internship",
-      },
-    ],
-    ndas: [
-      {
-        type: ObjectId,
-        ref: "Nda",
       },
     ],
     number: {

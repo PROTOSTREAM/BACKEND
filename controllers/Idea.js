@@ -78,26 +78,61 @@ exports.getIdeaById = (req, res, id, next) => {
 
 exports.createIdea = (req, res) => {
   trlValue = req.profile.TRL_Test;
-  if (!trlValue) {
+  console.log(trlValue==="pass");
+  if (trlValue==="pass") {
+     const idea = new Idea();
+     req.profile.startup=undefined;
+     idea.Student=req.profile;
+    idea.save((err, idea) => {
+      console.log(idea);
+      if (err || !idea) {
+        return res.status(500).json({
+          error: err || "Idea cannot be created",
+        });
+      }
+
+    User.findOneAndUpdate(
+      { _id: req.profile._id },
+      { startup:idea },
+      { new: true },
+      (err, updatedUser) => {
+        console.log(updatedUser);
+        if (err) {
+          return res.status(400).json({
+            error: "Unable to save Idea",
+          });
+        }
+        else{
+          return res.status(200).json({
+            "Idea":idea,
+          });        
+        }
+      }
+    );
+  });
+  }else{
     return res.status(500).json({
       error: "TRL NOT COMPLETED",
     });
   }
+    
 
-  const idea = new Idea(req.body);
+ 
+};
 
-  idea.save().then((err, idea) => {
-    if (err || !idea) {
-      return res.status(500).json({
-        error: err || "Idea cannot be created",
-      });
-    }
-
-    res.status(200).json({
-      message: "Idea Created",
-      idea: idea,
+exports.getIdeaOfUser = (req, res) => {
+  console.log("inside getIdeaOfUser");
+  User.findById({ _id: req.profile._id })
+    .populate("startup")
+    .exec((err, user) => {
+      console.log(user.startup);
+      if (err) {
+        return res.status(400).json({
+          error: err,
+        });
+      }
+      return res.status(200).json(user.startup);
     });
-  });
 };
 
 exports.deleteIdea = (req, res) => {
@@ -115,31 +150,32 @@ exports.deleteIdea = (req, res) => {
 };
 
 exports.getTrlValues = (req, res) => {
-  User.findById({ _id: id })
-    .then((err, user) => {
-      if (err || !user) {
-        return res.status(404).json({
-          error: err || "User Not found",
+  User.findById({ _id: req.profile._id },function(err,user) {
+    if(err||!user){
+      console.log("error",err);
+        return res.status(400).json({
+          error: err || "User not found",
         });
-      }
-      return res.status(200).json({
-        Trl: user.TRL_Test,
-      });
-    })
-    .catch((err) => console.log(err));
-};
+    }
+         return res.status(200).json({
+          "Trl_value": user.TRL_Test,
+        });
+  });
+}
+    
 
 exports.updateTrlValues = (req, res) => {
-  id = req.user._id;
-  User.findOneAndUpdate({ _id: id }, { TRL_Test: req.body.TRL_Test }).then(
-    (err, UpdatedUser) => {
+  id = req.profile._id;
+    console.log(id);
+  User.findOneAndUpdate({ _id: id }, { TRL_Test: req.body.TRL_Test },{new:true},function(err, UpdatedUser) {
       if (err || !UpdatedUser) {
         return res.status(404).json({
           error: err || "User Not found ",
         });
       }
-
-      return res.status(200).json(UpdatedUser);
+      return res.status(200).json({
+        "Trl_value": UpdatedUser.TRL_Test,
+      });
     }
   );
 };
