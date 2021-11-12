@@ -2,6 +2,7 @@ const User = require("../models/user");
 const Idea = require("../models/Ideas/idea");
 const Step2 = require("../models/Ideas/Step2");
 const Step3 = require("../models/Ideas/Step3");
+const url = require('url');
 
 //!Idea..
 
@@ -63,53 +64,75 @@ exports.getStep3 = (req, res, id, next) => {
   });
 };
 
-exports.getIdeaById = (req, res, id, next) => {
-  Idea.findById({ _id: id }).then((err, idea) => {
+
+//user signin routes
+exports.getIdeaById = (req, res, next) => {
+  console.log("iammiddleware");
+  Idea.findById( {_id: req.profile.startup}).exec((err, idea) => {
     if (err || !idea) {
       return res.status(500).json({
         error: err || "Idea Not found",
       });
     }
-    res.Idea = idea;
+    console.log(idea);
+    req.idea = idea;
+    next();
   });
-
-  next();
 };
+
+exports.getIdea = (req,res)=>{
+  console.log(req);
+  return res.json(
+    req.idea,
+  );
+}
+
+
 
 exports.createIdea = (req, res) => {
   trlValue = req.profile.TRL_Test;
-  console.log(trlValue==="pass");
+  console.log(!(req.profile.startup));
   if (trlValue==="pass") {
-     const idea = new Idea();
-     req.profile.startup=undefined;
-     idea.Student=req.profile;
-    idea.save((err, idea) => {
-      console.log(idea);
-      if (err || !idea) {
-        return res.status(500).json({
-          error: err || "Idea cannot be created",
+
+      if(!(req.profile.startup)){
+
+        const idea = new Idea();
+        req.profile.startup=undefined;
+        idea.Student=req.profile;
+    
+        idea.save((err, idea) => {
+          console.log(idea);
+          if (err || !idea) {
+            return res.status(500).json({
+              error: err || "Idea cannot be created",
+            });
+          }
+
+          User.findOneAndUpdate(
+            { _id: req.profile._id },
+            { startup:idea },
+            { new: true },
+            (err, updatedUser) => {
+              console.log(updatedUser);
+              if (err) {
+                return res.status(400).json({
+                  error: "Unable to save Idea",
+                });
+              }
+              else{
+                return res.status(200).json({
+                  "Idea":idea,
+                });        
+              }
+            }
+          );
         });
       }
-
-    User.findOneAndUpdate(
-      { _id: req.profile._id },
-      { startup:idea },
-      { new: true },
-      (err, updatedUser) => {
-        console.log(updatedUser);
-        if (err) {
-          return res.status(400).json({
-            error: "Unable to save Idea",
-          });
-        }
-        else{
-          return res.status(200).json({
-            "Idea":idea,
-          });        
-        }
-      }
-    );
-  });
+      else{
+        return res.status(200).json({
+          "Idea_ID":req.profile.startup._id,
+        })
+      }      
   }else{
     return res.status(500).json({
       error: "TRL NOT COMPLETED",
@@ -122,6 +145,7 @@ exports.createIdea = (req, res) => {
 
 exports.getIdeaOfUser = (req, res) => {
   console.log("inside getIdeaOfUser");
+  console.log(req.profile.startup);
   User.findById({ _id: req.profile._id })
     .populate("startup")
     .exec((err, user) => {
@@ -135,17 +159,29 @@ exports.getIdeaOfUser = (req, res) => {
     });
 };
 
+
+//deletebyUser
 exports.deleteIdea = (req, res) => {
+  console.log(req.idea);
   const id = req.idea._id;
-  Idea.deleteOne({ _id: id }).then((err, deletedIdea) => {
+  Idea.deleteOne({ _id: id },{new:true},(err, deletedIdea) => {
     if (err || !deletedIdea) {
       return res.status(500).json({
         error: err || "Idea cannot be deleted",
       });
     }
-    return res.status(200).json({
+    User.findOneAndUpdate({_id:req.profile._id},{$unset:{"startup":""}},{new:true},function(err,User){
+      if(err || !User){
+        return res.status(404).json({
+          error: err || "User Not found ",
+        });
+      }
+      return res.status(200).json({
+      profile: User,
       message: "Idea Deleted",
+      });
     });
+    
   });
 };
 
@@ -180,10 +216,12 @@ exports.updateTrlValues = (req, res) => {
   );
 };
 
-exports.UpdateDepartment = (req, res) => {
-  id = req.Idea._id;
-  Idea.findOneAndUpdate({ _id: id }, { department: req.body.department }),
-    then((err, UpdatedIdea) => {
+exports.chooseBranch = (req, res) => {
+  console.log(req.profile.startup);
+  id = req.profile.startup;
+  
+  Idea.findOneAndUpdate({ _id: id }, { department: req.body.branch },{new:true},
+    (err, UpdatedIdea) => {
       if (err || !UpdatedIdea) {
         return res.status(404).json({
           error: err || "User Not found ",

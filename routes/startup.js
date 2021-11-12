@@ -111,6 +111,10 @@ getTrlValues,
 updateTrlValues,
 createIdea,
 getIdeaOfUser,
+chooseBranch,
+getIdeaById,
+getIdea,
+deleteIdea,
 } = require("../controllers/Idea");
 // const {
 //   createNewStartup,
@@ -136,7 +140,7 @@ getIdeaOfUser,
 
 const router = express.Router();
 
-router.param("userId", getUserById);
+router.param("userId", getUserById,getIdeaById);
 router.param("tbiId", getTbiUserById);
 router.param("mentorId",getMentorUserById);
 //router.param("startupId", getStartupById);
@@ -187,9 +191,15 @@ router.param("mentorId",getMentorUserById);
 //router.post("/nda/:ndaId/:userId", isSignedIn, isTBI, getNda); //NOT TESTED
 //router.patch("/verifynda/:ndaId/:userId", isSignedIn, isTBI, verifyNda); //NOT TESTED
 
+
+//user routes
+router.get("/getIdea/:userId",getIdeaById,getIdea);
 router.get("/getTrl/:userId", getTrlValues);
 router.post("/updateTrl/:userId", updateTrlValues);
 router.post("/createIdea/:userId", createIdea);
-router.get("/getIdea/:userId", getIdeaOfUser);
+router.get("/getUserIdea/:userId", getIdeaOfUser);
+router.post("/chooseBranch/:userId", chooseBranch);
+
+router.get("/dropIdea/:userId",getIdeaById, deleteIdea);
 
 module.exports = router;
