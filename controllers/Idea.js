@@ -1,10 +1,197 @@
+require("dotenv").config();
 const User = require("../models/user");
 const Idea = require("../models/Ideas/idea");
 const Step2 = require("../models/Ideas/Step2");
 const Step3 = require("../models/Ideas/Step3");
 const url = require('url');
 
+const client = require('twilio')(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
+
 //!Idea..
+
+
+// USER FUNCTIONALITIES
+//user signin routes
+exports.getIdeaById = (req, res, next) => {
+  if(!(req.profile.startup)){
+    return res.status(400).json({
+      "Idea_ID":null,
+      "Message":"idea not created yet"
+    })
+  }
+  console.log("iammiddleware of idea");
+  Idea.findById( {_id: req.profile.startup}).exec((err, idea) => {
+    if (err || !idea) {
+      return res.status(500).json({
+        error: err || "Idea Not found",
+      });
+    }
+    console.log(idea);
+    req.idea = idea;
+    next();
+  });
+};
+
+exports.getIdea = (req,res)=>{
+  console.log(req);
+  return res.json(
+    req.idea,
+  );
+};
+
+
+exports.getTrlValues = (req, res) => {
+  User.findById({ _id: req.profile._id },function(err,user) {
+    if(err||!user){
+      console.log("error",err);
+        return res.status(400).json({
+          error: err || "User not found",
+        });
+    }
+         return res.status(200).json({
+          "Trl_value": user.TRL_Test,
+        });
+  });
+}
+    
+
+exports.updateTrlValues = (req, res) => {
+  id = req.profile._id;
+    console.log(id);
+  User.findOneAndUpdate({ _id: id }, { TRL_Test: req.body.TRL_Test },{new:true},function(err, UpdatedUser) {
+      if (err || !UpdatedUser) {
+        return res.status(404).json({
+          error: err || "User Not found ",
+        });
+      }
+      return res.status(200).json({
+        "Trl_value": UpdatedUser.TRL_Test,
+      });
+    }
+  );
+};
+
+exports.createIdea = (req, res) => {
+  trlValue = req.profile.TRL_Test;
+  console.log(!(req.profile.startup));
+  if (trlValue==="pass") {
+
+      if(!(req.profile.startup)){
+
+        const idea = new Idea();
+        req.profile.startup=undefined;
+        idea.Student=req.profile;
+    
+        idea.save((err, idea) => {
+          console.log(idea);
+          if (err || !idea) {
+            return res.status(500).json({
+              error: err || "Idea cannot be created",
+            });
+          }
+
+          User.findOneAndUpdate(
+            { _id: req.profile._id },
+            { startup:idea },
+            { new: true },
+            (err, updatedUser) => {
+              console.log(updatedUser);
+              if (err) {
+                return res.status(400).json({
+                  error: "Unable to save Idea",
+                });
+              }
+              else{
+                return res.status(200).json({
+                  "Idea":idea,
+                  "Message":"Created Fresh Idea"
+                });        
+              }
+            }
+          );
+        });
+      }
+      else{
+        return res.status(200).json({
+          "Idea":req.profile.startup,
+          "Message":"Idea already created with above id"
+        })
+      }      
+  }else{
+    return res.status(500).json({
+      error: "TRL NOT COMPLETED",
+    });
+  }
+};
+
+exports.getIdeaOfUser = (req, res) => {
+  console.log("inside getIdeaOfUser");
+  console.log(req.profile.startup);
+  User.findById({ _id: req.profile._id })
+    .populate("startup")
+    .exec((err, user) => {
+      console.log(user.startup);
+      if (err) {
+        return res.status(400).json({
+          error: err,
+        });
+      }
+      return res.status(200).json(user.startup);
+    });
+};
+
+//deletebyUser
+exports.deleteIdea = (req, res) => {
+  console.log(req.idea);
+  const id = req.idea._id;
+  Idea.deleteOne({ _id: id },{new:true},(err, deletedIdea) => {
+    if (err || !deletedIdea) {
+      return res.status(500).json({
+        error: err || "Idea cannot be deleted",
+      });
+    }
+    User.findOneAndUpdate({_id:req.profile._id},{$unset:{"startup":""}},{new:true},function(err,User){
+      if(err || !User){
+        return res.status(404).json({
+          error: err || "User Not found ",
+        });
+      }
+      return res.status(200).json({
+      profile: User,
+      "Message": "Idea Deleted",
+      });
+    });
+    
+  });
+};
+
+exports.chooseBranch = (req, res) => {
+  console.log("inside choosen branch");
+  
+  id = req.idea._id;
+  if(!(req.idea.department)){
+    Idea.findOneAndUpdate({ _id: id }, { department: req.body.branch },{new:true},
+      (err, UpdatedIdea) => {
+        if (err || !UpdatedIdea) {
+          return res.status(404).json({
+            error: err || "User Not found ",
+          });
+        }
+
+        return res.status(200).json({
+            "Idea":UpdatedIdea,
+            "Message":"Branch choosen"
+        });
+      });
+  }
+  else{
+  return res.status(200).json({
+    "Idea":req.idea,
+    "Message":"Branch already choosen above"
+  });
+  }
+};
+
 
 //!Step2.
 
@@ -65,172 +252,7 @@ exports.getStep3 = (req, res, id, next) => {
 };
 
 
-//user signin routes
-exports.getIdeaById = (req, res, next) => {
-  console.log("iammiddleware");
-  Idea.findById( {_id: req.profile.startup}).exec((err, idea) => {
-    if (err || !idea) {
-      return res.status(500).json({
-        error: err || "Idea Not found",
-      });
-    }
-    console.log(idea);
-    req.idea = idea;
-    next();
-  });
-};
 
-exports.getIdea = (req,res)=>{
-  console.log(req);
-  return res.json(
-    req.idea,
-  );
-}
-
-
-
-exports.createIdea = (req, res) => {
-  trlValue = req.profile.TRL_Test;
-  console.log(!(req.profile.startup));
-  if (trlValue==="pass") {
-
-      if(!(req.profile.startup)){
-
-        const idea = new Idea();
-        req.profile.startup=undefined;
-        idea.Student=req.profile;
-    
-        idea.save((err, idea) => {
-          console.log(idea);
-          if (err || !idea) {
-            return res.status(500).json({
-              error: err || "Idea cannot be created",
-            });
-          }
-
-          User.findOneAndUpdate(
-            { _id: req.profile._id },
-            { startup:idea },
-            { new: true },
-            (err, updatedUser) => {
-              console.log(updatedUser);
-              if (err) {
-                return res.status(400).json({
-                  error: "Unable to save Idea",
-                });
-              }
-              else{
-                return res.status(200).json({
-                  "Idea":idea,
-                });        
-              }
-            }
-          );
-        });
-      }
-      else{
-        return res.status(200).json({
-          "Idea_ID":req.profile.startup._id,
-        })
-      }      
-  }else{
-    return res.status(500).json({
-      error: "TRL NOT COMPLETED",
-    });
-  }
-    
-
- 
-};
-
-exports.getIdeaOfUser = (req, res) => {
-  console.log("inside getIdeaOfUser");
-  console.log(req.profile.startup);
-  User.findById({ _id: req.profile._id })
-    .populate("startup")
-    .exec((err, user) => {
-      console.log(user.startup);
-      if (err) {
-        return res.status(400).json({
-          error: err,
-        });
-      }
-      return res.status(200).json(user.startup);
-    });
-};
-
-
-//deletebyUser
-exports.deleteIdea = (req, res) => {
-  console.log(req.idea);
-  const id = req.idea._id;
-  Idea.deleteOne({ _id: id },{new:true},(err, deletedIdea) => {
-    if (err || !deletedIdea) {
-      return res.status(500).json({
-        error: err || "Idea cannot be deleted",
-      });
-    }
-    User.findOneAndUpdate({_id:req.profile._id},{$unset:{"startup":""}},{new:true},function(err,User){
-      if(err || !User){
-        return res.status(404).json({
-          error: err || "User Not found ",
-        });
-      }
-      return res.status(200).json({
-      profile: User,
-      message: "Idea Deleted",
-      });
-    });
-    
-  });
-};
-
-exports.getTrlValues = (req, res) => {
-  User.findById({ _id: req.profile._id },function(err,user) {
-    if(err||!user){
-      console.log("error",err);
-        return res.status(400).json({
-          error: err || "User not found",
-        });
-    }
-         return res.status(200).json({
-          "Trl_value": user.TRL_Test,
-        });
-  });
-}
-    
-
-exports.updateTrlValues = (req, res) => {
-  id = req.profile._id;
-    console.log(id);
-  User.findOneAndUpdate({ _id: id }, { TRL_Test: req.body.TRL_Test },{new:true},function(err, UpdatedUser) {
-      if (err || !UpdatedUser) {
-        return res.status(404).json({
-          error: err || "User Not found ",
-        });
-      }
-      return res.status(200).json({
-        "Trl_value": UpdatedUser.TRL_Test,
-      });
-    }
-  );
-};
-
-exports.chooseBranch = (req, res) => {
-  console.log(req.profile.startup);
-  id = req.profile.startup;
-  
-  Idea.findOneAndUpdate({ _id: id }, { department: req.body.branch },{new:true},
-    (err, UpdatedIdea) => {
-      if (err || !UpdatedIdea) {
-        return res.status(404).json({
-          error: err || "User Not found ",
-        });
-      }
-
-      return res.status(200).json(UpdatedIdea);
-    });
-};
 
 //!Step2..
 
@@ -240,71 +262,87 @@ exports.createReview = (req, res) => {};
 exports.updateIdea = (req, res) => {};
 
 exports.otplogin = (req, res) => {
+  console.log(req.idea);
   console.log(req.profile.number);
   console.log("inside otp login");
-
-  if (req.profile.number) {
-    client.verify
-      .services(process.env.SERVICE_ID)
-      .verifications.create({
-        to: `+${req.profile.number}`,
-        channel: "sms",
-      })
-      .then((data) => {
-        if (data.status === "pending") {
-          res.status(200).send({ data });
-        }
-        Idea.findOneAndUpdate(
-          { _id: req.Idea._id },
-          { phonestatus: data.status },
-          { new: true },
-          function (err, result) {
-            if (err) {
-              console.log(err);
-            } else {
-              // console.log(result);
-            }
+  console.log(req.idea.department);
+  if(!(req.idea.department)){
+    return res.status(200).json({
+      "Idea":req.idea,
+      "Message":"Branch not choosen"
+    })
+  }
+  else{
+    if (req.profile.number) {
+      console.log("got a number")
+      client.verify
+        .services(process.env.SERVICE_ID)
+        .verifications.create({
+          to: `+91${req.profile.number}`,
+          channel: "sms",
+        })
+        .then((data) => {
+          if (data.status === "pending") {
+            console.log("after pending..");
+            Idea.findOneAndUpdate(
+              { _id: req.idea._id },
+              { phonestatus: data.status },
+              { new: true },
+              function (err, UpdatedIdea) {
+                if (err) {
+                  console.log(err);
+                }
+                res.status(200).json({
+                  "Idea":UpdatedIdea,
+                  "Data":data,
+                  "Message":"otp sent"
+                }); 
+              }
+            );
           }
-        );
+
+        });
+    } else {
+      res.status(400).send({
+        "Message": "Wrong number :( or otp already sent",
       });
-  } else {
-    res.status(400).send({
-      message: "Wrong number :(",
-    });
+    }
   }
 };
 
 exports.otpverify = (req, res) => {
-  if (req.body.code.length === 6) {
+    if(!(req.idea.department)){
+    return res.status(200).json({
+      "Idea":req.idea,
+      "Message":"Branch not choosen"
+    })
+  }else{
+    if (req.body.code.length === 6 && req.idea.phonestatus==="pending") {
     console.log("inside this");
-    Idea.findOne({ _id: req.Idea._id }).exec((err, user) => {
-      if (err) {
-        return res.status(400).json({
-          error: err,
-        });
-      } else {
         client.verify
           .services(process.env.SERVICE_ID)
           .verificationChecks.create({
-            to: `+${req.profile.number}`,
+            to: `+91${req.profile.number}`,
             code: req.body.code,
           })
           .then((data) => {
             const status = data.status;
             console.log(status);
             if (status === "approved") {
-              res.status(200).send({ data });
-              console.log("after sending..");
+              console.log("after verifying..");
               Idea.findOneAndUpdate(
-                { _id: req.Idea._id },
+                { _id: req.idea._id },
                 { phonestatus: data.status },
                 { new: true },
-                function (err, result) {
+                function (err, UpdatedIdea) {
                   if (err) {
                     console.log(err);
-                  } else {
-                    // console.log(result);
                   }
+                  res.status(200).json({
+                    "Idea":UpdatedIdea,
+                    "Data":data,
+                    "Message":"otp sent"
+                  });                 
                 }
               );
             } else {
@@ -312,13 +350,14 @@ exports.otpverify = (req, res) => {
                 err: "wrong code",
               });
             }
-          })
-          .catch((err) => console.log(err));
-      }
-    });
-  } else {
+          });
+    }
+    else {
     res.status(400).send({
-      message: "Wrong code:(",
+      message: "Wrong code:( or already verified",
     });
   }
+  }
+
+
 };

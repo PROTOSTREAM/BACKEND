@@ -115,6 +115,8 @@ chooseBranch,
 getIdeaById,
 getIdea,
 deleteIdea,
+otplogin,
+otpverify
 } = require("../controllers/Idea");
 // const {
 //   createNewStartup,
@@ -194,12 +196,17 @@ router.param("mentorId",getMentorUserById);
 
 //user routes
 router.get("/getIdea/:userId",getIdeaById,getIdea);
+
 router.get("/getTrl/:userId", getTrlValues);
 router.post("/updateTrl/:userId", updateTrlValues);
 router.post("/createIdea/:userId", createIdea);
 router.get("/getUserIdea/:userId", getIdeaOfUser);
-router.post("/chooseBranch/:userId", chooseBranch);
 
-router.get("/dropIdea/:userId",getIdeaById, deleteIdea);
+router.post("/idea/chooseBranch/:userId", getIdeaById, chooseBranch);
+router.get("/idea/otplogin/:userId",getIdeaById, otplogin);
+router.post("/idea/otpverify/:userId",getIdeaById, otpverify);
+router.get("/idea/dropIdea/:userId",getIdeaById, deleteIdea);
+
+
 
 module.exports = router;
