@@ -124,6 +124,112 @@ exports.createIdea = (req, res) => {
   }
 };
 
+
+
+
+//STEP-1
+exports.otplogin = (req, res) => {
+  console.log(req.idea);
+  console.log(req.profile.number);
+  console.log("inside otp login");
+  console.log(req.idea.department);
+  if(!(req.idea.department)){
+    return res.status(200).json({
+      "Idea":req.idea,
+      "Message":"Branch not choosen"
+    })
+  }
+  else{
+    if (req.profile.number) {
+      console.log("got a number")
+      client.verify
+        .services(process.env.SERVICE_ID)
+        .verifications.create({
+          to: `+91${req.profile.number}`,
+          channel: "sms",
+        })
+        .then((data) => {
+          if (data.status === "pending") {
+            console.log("after pending..");
+            Idea.findOneAndUpdate(
+              { _id: req.idea._id },
+              { phonestatus: data.status },
+              { new: true },
+              function (err, UpdatedIdea) {
+                if (err) {
+                  console.log(err);
+                }
+                res.status(200).json({
+                  "Idea":UpdatedIdea,
+                  "Data":data,
+                  "Message":"otp sent"
+                }); 
+              }
+            );
+          }
+
+        });
+    } else {
+      res.status(400).send({
+        "Message": "Wrong number :( or otp already sent",
+      });
+    }
+  }
+};
+
+exports.otpverify = (req, res) => {
+    if(!(req.idea.department)){
+    return res.status(200).json({
+      "Idea":req.idea,
+      "Message":"Branch not choosen"
+    })
+  }else{
+    if (req.body.code.length === 6 && req.idea.phonestatus==="pending") {
+    console.log("inside this");
+        client.verify
+          .services(process.env.SERVICE_ID)
+          .verificationChecks.create({
+            to: `+91${req.profile.number}`,
+            code: req.body.code,
+          })
+          .then((data) => {
+            const status = data.status;
+            console.log(status);
+            if (status === "approved") {
+              console.log("after verifying..");
+              Idea.findOneAndUpdate(
+                { _id: req.idea._id },
+                { phonestatus: data.status },
+                { new: true },
+                function (err, UpdatedIdea) {
+                  if (err) {
+                    console.log(err);
+                  }
+                  res.status(200).json({
+                    "Idea":UpdatedIdea,
+                    "Data":data,
+                    "Message":"otp sent"
+                  });                 
+                }
+              );
+            } else {
+              res.status(400).send({
+                err: "wrong code",
+              });
+            }
+          });
+    }
+    else {
+    res.status(400).send({
+      message: "Wrong code:( or already verified",
+    });
+  }
+  }
+
+
+};
+
+//showtoUser
 exports.getIdeaOfUser = (req, res) => {
   console.log("inside getIdeaOfUser");
   console.log(req.profile.startup);
@@ -139,6 +245,7 @@ exports.getIdeaOfUser = (req, res) => {
       return res.status(200).json(user.startup);
     });
 };
+
 
 //deletebyUser
 exports.deleteIdea = (req, res) => {
@@ -261,103 +368,4 @@ exports.createReview = (req, res) => {};
 
 exports.updateIdea = (req, res) => {};
 
-exports.otplogin = (req, res) => {
-  console.log(req.idea);
-  console.log(req.profile.number);
-  console.log("inside otp login");
-  console.log(req.idea.department);
-  if(!(req.idea.department)){
-    return res.status(200).json({
-      "Idea":req.idea,
-      "Message":"Branch not choosen"
-    })
-  }
-  else{
-    if (req.profile.number) {
-      console.log("got a number")
-      client.verify
-        .services(process.env.SERVICE_ID)
-        .verifications.create({
-          to: `+91${req.profile.number}`,
-          channel: "sms",
-        })
-        .then((data) => {
-          if (data.status === "pending") {
-            console.log("after pending..");
-            Idea.findOneAndUpdate(
-              { _id: req.idea._id },
-              { phonestatus: data.status },
-              { new: true },
-              function (err, UpdatedIdea) {
-                if (err) {
-                  console.log(err);
-                }
-                res.status(200).json({
-                  "Idea":UpdatedIdea,
-                  "Data":data,
-                  "Message":"otp sent"
-                }); 
-              }
-            );
-          }
 
-        });
-    } else {
-      res.status(400).send({
-        "Message": "Wrong number :( or otp already sent",
-      });
-    }
-  }
-};
-
-exports.otpverify = (req, res) => {
-    if(!(req.idea.department)){
-    return res.status(200).json({
-      "Idea":req.idea,
-      "Message":"Branch not choosen"
-    })
-  }else{
-    if (req.body.code.length === 6 && req.idea.phonestatus==="pending") {
-    console.log("inside this");
-        client.verify
-          .services(process.env.SERVICE_ID)
-          .verificationChecks.create({
-            to: `+91${req.profile.number}`,
-            code: req.body.code,
-          })
-          .then((data) => {
-            const status = data.status;
-            console.log(status);
-            if (status === "approved") {
-              console.log("after verifying..");
-              Idea.findOneAndUpdate(
-                { _id: req.idea._id },
-                { phonestatus: data.status },
-                { new: true },
-                function (err, UpdatedIdea) {
-                  if (err) {
-                    console.log(err);
-                  }
-                  res.status(200).json({
-                    "Idea":UpdatedIdea,
-                    "Data":data,
-                    "Message":"otp sent"
-                  });                 
-                }
-              );
-            } else {
-              res.status(400).send({
-                err: "wrong code",
-              });
-            }
-          });
-    }
-    else {
-    res.status(400).send({
-      message: "Wrong code:( or already verified",
-    });
-  }
-  }
-
-
-};
