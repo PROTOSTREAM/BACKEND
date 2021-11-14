@@ -230,7 +230,7 @@ router.get("/idea/getStep2/:userId",isSignedIn,getStep2ById,getStep2);
 
 //router.get("/idea/getStep2/:userId",getIdeaById,getStep2ById,getStep2);
 router.get("/idea/clickStep3/:userId",isSignedIn,getIdeaById,getStep3ById,exportStep2andOpenForm3);
-//router.post("/idea/createStep2/:userId",getIdeaById,getStep2ById,createStep2);
+router.post("/idea/createStep3/:userId",isSignedIn,getIdeaById,getStep3ById,createStep2);
 //router.get("/idea/getStep2/:userId",getStep2ById,getStep2);
 
 
