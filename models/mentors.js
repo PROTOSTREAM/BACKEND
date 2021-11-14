@@ -25,7 +25,12 @@ const mentorSchema = mongoose.Schema({
       type: Number,
       required: true,
     },
-  //ListOfIdeas: { type: ObjectId, ref: ["Ideas"] },
+    Ideas: [
+      {
+        type: ObjectId,
+        ref: "Step2",
+      },
+    ], 
 });
 
-module.exports = mongoose.model("Mentors", mentorSchema);
+module.exports = mongoose.model("Mentor", mentorSchema);

@@ -3,6 +3,7 @@ const User = require("../models/user");
 const Idea = require("../models/Ideas/idea");
 const Step2 = require("../models/Ideas/Step2");
 const Step3 = require("../models/Ideas/Step3");
+const Mentor = require("../models/mentors");
 const url = require('url');
 
 const client = require('twilio')(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
@@ -17,7 +18,7 @@ exports.getIdeaById = (req, res, next) => {
     return res.status(400).json({
       "Idea_ID":null,
       "Message":"idea not created yet"
-    })
+    });
   }
   console.log("iammiddleware of idea");
   Idea.findById( {_id: req.profile.startup}).exec((err, idea) => {
@@ -37,6 +38,85 @@ exports.getIdea = (req,res)=>{
   return res.json(
     req.idea,
   );
+};
+
+exports.getStep2ById = (req, res, next) => {
+  console.log(req.idea);
+      if(req.idea.status==="branch-choosed"){
+          return res.status(200).json({
+            "Idea":req.idea,
+            "Message":"Step1 not completed yet"
+          });
+      }
+      if(req.idea.status==="Step1-complete"){
+        console.log("iam goin to open step2");
+        next();
+      }
+      if(req.idea.status==="Step2-form-open"){
+        console.log("redirect to open form of Step2");
+        next();
+      }
+      if(req.idea.status==="under-reviewed" || req.idea.status==="reviewed" || req.idea.status==="under-verified" || req.idea.status==="verified"){
+          Step2.findById({ _id: req.idea.Step2 },(err, Step2) => {
+          if (err || !idea) {
+            return res.status(500).json({
+              error: err || "Idea Not found",
+            });
+          }
+          console.log(Step2);
+          req.step2 = Step2;
+          next();
+        });
+      }
+
+  // if(req.idea.status==="under-reviewed" || req.idea.status==="reviewed" || req.idea.status==="under-verified" || req.idea.status==="verified"){
+  //     Step2.findById({ _id: req.idea.Step2 },(err, Step2) => {
+  //     if (err || !idea) {
+  //       return res.status(500).json({
+  //         error: err || "Idea Not found",
+  //       });
+  //     }
+  //     console.log(Step2);
+  //     req.step2 = Step2;
+  //     next();
+  //   });
+  // }else{
+  
+  
+  // }
+  
+};
+
+
+exports.exportMentorandOpenForm = (req,res)=>{
+    let ideaId = req.idea._id;
+    let branch=req.idea.department;
+    Mentor.find({department:"eee"},(err,mentors)=>{
+        if(err || !mentors){
+          return res.status(500).json({
+            error: err || "Mentors not avaiable yet",
+          })
+        }
+        Idea.findOneAndUpdate({_id:ideaId},{status:"Step2-form-open"},{new:true},(err,UpdatedIdea)=>{
+          if(err || !UpdatedIdea){
+              return res.status(500).json({
+              error: err || "Idea Not found",
+            });
+          }
+          return res.status(200).json({
+            "Mentor":mentors,
+            "Idea":UpdatedIdea,
+            "Message":"Step2 form will open now",
+          });
+        });
+    });
+}
+
+exports.getStep2 = (req,res)=>{
+  console.log(req);
+  return res.json(
+    req.step2,
+  )
 };
 
 
@@ -75,9 +155,7 @@ exports.createIdea = (req, res) => {
   trlValue = req.profile.TRL_Test;
   console.log(!(req.profile.startup));
   if (trlValue==="pass") {
-
       if(!(req.profile.startup)){
-
         const idea = new Idea();
         req.profile.startup=undefined;
         idea.Student=req.profile;
@@ -112,10 +190,17 @@ exports.createIdea = (req, res) => {
         });
       }
       else{
-        return res.status(200).json({
-          "Idea":req.profile.startup,
-          "Message":"Idea already created with above id"
-        })
+          Idea.findById( {_id: req.profile.startup}).exec((err, idea) => {
+            if (err || !idea) {
+              return res.status(500).json({
+              error: err || "Idea Not found",
+              });
+            }
+            return res.status(200).json({
+              "Idea":idea,
+              "Message":"Idea already created"
+            });
+          });
       }      
   }else{
     return res.status(500).json({
@@ -199,7 +284,7 @@ exports.otpverify = (req, res) => {
               console.log("after verifying..");
               Idea.findOneAndUpdate(
                 { _id: req.idea._id },
-                { phonestatus: data.status },
+                {$set:{ phonestatus: data.status,status: "Step1-complete"}},
                 { new: true },
                 function (err, UpdatedIdea) {
                   if (err) {
@@ -277,7 +362,7 @@ exports.chooseBranch = (req, res) => {
   
   id = req.idea._id;
   if(!(req.idea.department)){
-    Idea.findOneAndUpdate({ _id: id }, { department: req.body.branch },{new:true},
+    Idea.findOneAndUpdate({ _id: id },{$set:{ department: req.body.branch, status:"branch-choosed" }} ,{new:true},
       (err, UpdatedIdea) => {
         if (err || !UpdatedIdea) {
           return res.status(404).json({
@@ -300,35 +385,62 @@ exports.chooseBranch = (req, res) => {
 };
 
 
-//!Step2.
 
-exports.getStep2 = (req, res, id, next) => {
-  Step2.findById({ _id: id }).then((err, idea) => {
-    if (err || !idea) {
-      return res.status(500).json({
-        error: err || "Idea Not found",
-      });
-    }
-
-    res.Step2 = idea;
-    next();
-  });
-};
 
 exports.createStep2 = (req, res) => {
-  step2 = new Step2(req.body);
-  step2.save().then((err, step) => {
-    if (err || !step) {
-      return res.status(500).json({
-        error: err || "Step2 Not Created!!",
-      });
-    }
+  let underMentor=req.body.mentorId;
+  let mainIdea=req.idea;
+  const step2 = new Step2();
+        req.idea.Step2=undefined;
+        step2.underIdea=mainIdea;
+        step2.Mentor=underMentor;
+        step2.save((err, step2) => {
+          console.log(step2);
+          if (err || !step2) {
+            return res.status(500).json({
+              error: err || "Step2 cannot be created",
+            });
+          }
+          Idea.findOneAndUpdate(
+            { _id: req.idea._id },
+            { Step2:step2 },
+            { new: true },
+            (err, updateIdea) => {
+              console.log(updatedIdea);
+              if (err) {
+                return res.status(400).json({
+                  error: "Unable to save Step2",
+                });
+              }
+              else{
+                let arr_step2 = [];
 
-    //! save all steps to mentor and save mentor to step2..
-    Mentor.findOneAndUpdate({ _id: req.body.mentorId }, {}, { new: true });
+                arr_step2.push(step2);
 
-    return res.status(200).json(step);
-  });
+                Mentor.findOneAndUpdate(
+                  { _id: underMentor },
+                  { $push: { Ideas: arr_step2 } },
+                  { new: true },
+                  (err, updatedMentor) => {
+                    if (err) {
+                      return res.status(400).json({
+                        error: "Unable to send idea to Mentor",
+                      });
+                    }
+                    return res.status(200).json({
+                      "Step2":step2,
+                      "Idea":updateIdea,
+                      "Mentor":underMentor,
+                      "Message":"Created Fresh Step2",
+                    });  
+                  }
+                );
+                      
+              }
+            }
+          );
+        });
+
 };
 
 exports.createStep3 = (req, res) => {

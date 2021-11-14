@@ -116,7 +116,11 @@ getIdeaById,
 getIdea,
 deleteIdea,
 otplogin,
-otpverify
+otpverify,
+getStep2ById,
+getStep2,
+exportMentorandOpenForm,
+createStep2,
 } = require("../controllers/Idea");
 // const {
 //   createNewStartup,
@@ -142,9 +146,9 @@ otpverify
 
 const router = express.Router();
 
-router.param("userId", getUserById,getIdeaById);
-router.param("tbiId", getTbiUserById);
-router.param("mentorId",getMentorUserById);
+
+//router.param("step3Id",getIdeaById,getStep3ById);
+
 //router.param("startupId", getStartupById);
 //router.param("ndaId", getNdaById);
 
@@ -193,6 +197,13 @@ router.param("mentorId",getMentorUserById);
 //router.post("/nda/:ndaId/:userId", isSignedIn, isTBI, getNda); //NOT TESTED
 //router.patch("/verifynda/:ndaId/:userId", isSignedIn, isTBI, verifyNda); //NOT TESTED
 
+router.param("userId", getUserById,getIdeaById,getStep2ById);
+router.param("tbiId", getTbiUserById);
+router.param("mentorId",getMentorUserById);
+//router.param("ideaId",getIdeaById);
+
+
+
 
 //user routes
 router.get("/getIdea/:userId",getIdeaById,getIdea);
@@ -200,11 +211,19 @@ router.get("/getIdea/:userId",getIdeaById,getIdea);
 router.get("/getTrl/:userId", getTrlValues);
 router.post("/updateTrl/:userId", updateTrlValues);
 router.post("/createIdea/:userId", createIdea);
-router.get("/getUserIdea/:userId", getIdeaOfUser);
+//router.get("/getUserIdea/:userId", getIdeaOfUser);
 
-router.post("/idea/chooseBranch/:userId", getIdeaById, chooseBranch);
+router.post("/idea/chooseBranch/:userId", getIdeaById,chooseBranch);
 router.get("/idea/otplogin/:userId",getIdeaById, otplogin);
 router.post("/idea/otpverify/:userId",getIdeaById, otpverify);
+
+
+router.get("/idea/clickStep2/:userId",getIdeaById,getStep2ById,exportMentorandOpenForm);
+router.post("/idea/createStep2/:userId",getIdeaById,getStep2ById,createStep2);
+
+//router.get("/idea/getStep2/:userId",getIdeaById,getStep2ById,getStep2);
+
+
 router.get("/idea/dropIdea/:userId",getIdeaById, deleteIdea);
 
 

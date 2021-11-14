@@ -11,6 +11,7 @@ const ReviewIdeaSchema = mongoose.Schema({
   BriefData: String,
   URL: String,
   Mentor: { type: ObjectId, ref: "Mentor" },
+  underIdea: { type: ObjectId, ref: "Idea" },
 });
 
 module.exports = mongoose.model("Step2", ReviewIdeaSchema);
