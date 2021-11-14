@@ -2,7 +2,7 @@ const User = require("../models/user");
 const Idea = require("../models/Ideas/idea");
 const Step2 = require("../models/Ideas/Step2");
 const Step3 = require("../models/Ideas/Step3");
-const MentorUser = require("../models/mentors");
+const Mentor = require("../models/mentors");
 //!Not completed..
 
 // exports.getAllMentorIdeas = (req, res) => {
@@ -13,16 +13,16 @@ const MentorUser = require("../models/mentors");
 // };
 
 
+
 exports.getMentorUserById = (req, res, next, id) => {
-  // console.log("in getUserById");
-  // console.log(id);
-  MentorUser.findById(id).exec((err, user) => {
+  Mentor.findById(id).exec((err, user) => {
     if (err || !user) {
       return res.status(400).json({
         error: "No user was found in DB",
       });
     }
     req.profile = user;
+    console.log(req.profile);
     next();
   });
 };

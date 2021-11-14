@@ -82,6 +82,7 @@ exports.register = (req, res) => {
                   role,
                   phonestatus,
                   number,
+                  TRL_Test
                 } = savedUser;
 
                 return res.send({
@@ -98,6 +99,7 @@ exports.register = (req, res) => {
                     role,
                     phonestatus,
                     number,
+                    TRL_Test
                   },
                 });
               } else {
@@ -287,6 +289,7 @@ exports.login = (req, res) => {
                 role,
                 number,
                 phonestatus,
+                TRL_Test
               } = foundUser;
               // console.log(res.headers);
               // return res.send("sending response");
@@ -307,6 +310,7 @@ exports.login = (req, res) => {
                   role,
                   number,
                   phonestatus,
+                  TRL_Test
                 },
               });
             } else {
@@ -407,6 +411,7 @@ exports.login = (req, res) => {
               role,
               department,
               number,
+              Ideas,
             } = foundUser;
             // console.log(res.headers);
             // return res.send("sending response");
@@ -423,6 +428,7 @@ exports.login = (req, res) => {
                 role,
                 department,
                 number,
+                Ideas,
               },
             });
           } else {

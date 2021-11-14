@@ -9,6 +9,83 @@ const url = require('url');
 const client = require('twilio')(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
 
 //!Idea..
+//Mentors Functionality
+exports.getStep2Id = (req,res,next) =>{
+        let id = req.body.ideaId;  
+        //console.log(id);
+        console.log(req.profile._id);
+        Step2.findById({ _id: id },(err, Step2) => {
+          if (err || !Step2) {
+            return res.status(500).json({
+              error: err || "Step2 Not found",
+            });
+          }
+          req.step2 = Step2;
+          //console.log(req.step2);
+          next();
+        });
+}
+
+exports.getAllStep2 = (req,res) =>{
+   Mentor.findById({ _id: req.profile._id })
+    .populate("Ideas")
+    .exec((err, user) => {
+      if (err) {
+        return res.status(400).json({
+          error: err,
+        });
+      }
+      return res.status(200).json(
+        {
+          "Ideas":user.Ideas,
+        });
+    });
+}
+
+exports.selectIdea = (req,res) =>{
+      console.log(req.step2);
+        return res.json({
+          "Step2":req.step2,
+        });
+};
+
+exports.editIdea = (req,res) =>{
+    let ideaId = req.step2.underIdea;
+    let step2Id = req.step2._id;
+    let mentorReviewValue=req.body.value;  //value===reviewed/approved
+    console.log(ideaId);
+    console.log()
+        Idea.findOneAndUpdate({_id:ideaId},{status:mentorReviewValue},{new:true},(err,UpdatedIdea)=>{
+          if(err || !UpdatedIdea){
+              return res.status(500).json({
+              error: err || "Idea Not found",
+            });
+          }
+          if(mentorReviewValue==="approved"){
+                Step2.findOneAndUpdate({_id:step2Id},{review:"1"},{new:true},(err,UpdatedStep2)=>{
+                      if(err || !UpdatedStep2){
+                          return res.status(500).json({
+                          error: err || "Idea Not found",
+                        });
+                      }
+                     return res.status(200).json({
+                        "Step2":UpdatedStep2,
+                        "Idea":UpdatedIdea,
+                        "Message":"Step3 form will open now",
+                        "Action":"Idea got approved"
+                      });
+                });
+          }
+          return res.status(200).json({
+            "Idea":UpdatedIdea,
+            "Message":"Step3 form will open now",
+            "Action":"Idea got reviewed only"
+          })
+          
+        });
+}
+
+
 
 
 // USER FUNCTIONALITIES
@@ -71,6 +148,7 @@ exports.getStep2ById = (req, res, next) => {
           }
           req.step2 = Step2;
           return res.json({
+            "Idea":req.idea,
             "Step2":req.step2,
             "Message":"Step2 already created above"
           }
@@ -81,7 +159,8 @@ exports.getStep2ById = (req, res, next) => {
 
 
 exports.getStep3ById = (req, res, next) => {
-  console.log(req.idea);
+  let step2Id = req.idea.Step2;
+ 
       if(req.idea.status==="new-idea-created"){
           return res.status(200).json({
             "Idea":req.idea,
@@ -106,9 +185,11 @@ exports.getStep3ById = (req, res, next) => {
             "Message":"Step2 not reviewed yet"
           });
       }
+      
       if(req.idea.status==="reviewed" || req.idea.status==="approved"){
         console.log("iam goin to open step3");
-        next();
+          req.step2Id=step2Id;
+          next();
       }
       if(req.idea.status==="Step3-form-open"){
         console.log("redirect to open form of Step3");
@@ -121,12 +202,11 @@ exports.getStep3ById = (req, res, next) => {
               error: err || "Idea Not found",
             });
           }
+
           req.step3 = Step3;
           return res.json({
 
-          }
-            
-          )
+          });
         });
       }
 };
@@ -157,31 +237,51 @@ exports.exportMentorandOpenForm = (req,res)=>{
 }
 
 exports.exportStep2andOpenForm3 = (req,res)=>{
-    let step2Id = req.step2._id;
-    let mentorId = req.step2.Mentor._id;
-    let mentorInfo = {};
-    if(step2.review==="1"){
-         Mentor.find({_id:mentorId},(err,mentor)=>{
-        if(err || !mentor){
+
+    let step2Id = req.step2Id;
+    console.log(step2Id);
+    let mentorId = "";
+    let ideaId = "";
+    Step2.findById({_id:step2Id},(err,foundStep2)=>{
+      if(err || !foundStep2){
           return res.status(500).json({
-            error: err || "Mentors not avaiable yet",
+            error: err || "Step2 not found",
           })
         }
-        mentorInfo=mentor;        
+        else{
+          mentorId=foundStep2.Mentor;
+          ideaId=foundStep2.underIdea;
+          console.log(mentorId);
+          console.log(ideaId);
+            Idea.findOneAndUpdate({_id:ideaId},{status:"Step3-form-open"},{new:true},(err,UpdatedIdea)=>{
+                  if(err || !UpdatedIdea){
+                      return res.status(500).json({
+                      error: err || "Idea Not found",
+                    });
+                  }
+                  Mentor.find({_id:mentorId},(err,mentor)=>{
+                    if(err || !mentor){
+                      return res.status(500).json({
+                        error: err || "Mentors not avaiable yet",
+                      })
+                    }  
+                    if(foundStep2.review===1){
+                          return res.status(200).json({
+                            "Mentor":mentor,
+                            "Idea":UpdatedIdea,
+                            "Message":"Step3 form will open now",
+                          });
+                    }
+                    else{
+                          return res.status(200).json({
+                            "Idea":UpdatedIdea,
+                            "Message":"Step3 form will open now",
+                          });
+                    }  
+                });                  
+            });  
+        }
     });
-    }
-    Idea.findOneAndUpdate({_id:ideaId},{status:"Step3-form-open"},{new:true},(err,UpdatedIdea)=>{
-          if(err || !UpdatedIdea){
-              return res.status(500).json({
-              error: err || "Idea Not found",
-            });
-          }
-          return res.status(200).json({
-            "Mentor":mentorInfo,
-            "Idea":UpdatedIdea,
-            "Message":"Step2 form will open now",
-          });
-        });
 }
 
 exports.getStep2 = (req,res)=>{
@@ -303,11 +403,11 @@ exports.otplogin = (req, res) => {
       "Message":"Branch not choosen"
     })
   }
-  if(req.idea.status!=="Step1-complete" || req.idea.status==="under-reviewed" || req.idea.status==="reviewed" || req.idea.status==="approved" || req.idea.status==="under-verified" || req.idea.status==="verified" || req.idea.status==="not-verified"){
+  else if(req.idea.status==="Step1-complete" || req.idea.status==="under-reviewed" || req.idea.status==="reviewed" || req.idea.status==="approved" || req.idea.status==="under-verified" || req.idea.status==="verified" || req.idea.status==="not-verified"){
     return res.status(200).json({
       "Idea":req.idea,
       "Message":"You have already verified your number"
-    })
+    });
   }
   else{
     if (req.profile.number) {
@@ -354,7 +454,7 @@ exports.otpverify = (req, res) => {
       "Message":"Branch not choosen"
     })
   }
-  if(req.idea.status!=="Step1-complete" || req.idea.status==="under-reviewed" || req.idea.status==="reviewed" || req.idea.status==="approved" || req.idea.status==="under-verified" || req.idea.status==="verified" || req.idea.status==="not-verified"){
+  else if(req.idea.status==="Step1-complete" || req.idea.status==="under-reviewed" || req.idea.status==="reviewed" || req.idea.status==="approved" || req.idea.status==="under-verified" || req.idea.status==="verified" || req.idea.status==="not-verified"){
     return res.status(200).json({
       "Idea":req.idea,
       "Message":"You have already verified your number"

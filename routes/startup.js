@@ -101,8 +101,7 @@ const multerStorage = multer.diskStorage({
 const upload = multer({ storage: multerStorage });
 
 const { getUserById, getUser } = require("../controllers/user");
-const { getMentorUserById, getMentorUser } = require("../controllers/mentors");
-const { getTbiUserById, getTbiUser } = require("../controllers/tbi");
+const { getMentorUserById, getMentorUser} = require("../controllers/mentors");
 
 const { isSignedIn, isAuthenticated, isTBI, isMENTOR} = require("../controllers/auth");
 
@@ -124,7 +123,11 @@ createStep2,
 getStep3ById,
 getStep3,
 exportStep2andOpenForm3,
-createStep3
+createStep3,
+getStep2Id,
+getAllStep2,
+selectIdea,
+editIdea
 } = require("../controllers/Idea");
 // const {
 //   createNewStartup,
@@ -202,38 +205,41 @@ const router = express.Router();
 //router.patch("/verifynda/:ndaId/:userId", isSignedIn, isTBI, verifyNda); //NOT TESTED
 
 router.param("userId", getUserById,getIdeaById,getStep2ById,getStep3ById);
-router.param("tbiId", getTbiUserById);
-router.param("mentorId",getMentorUserById);
+router.param("mentorId",getMentorUserById,getStep2Id);
 //router.param("ideaId",getIdeaById);
 
 
 
 
 //user routes
-router.get("/getIdea/:userId",getIdeaById,getIdea);
+router.get("/getIdea/:userId",isSignedIn,getIdeaById,getIdea);
 
-router.get("/getTrl/:userId", getTrlValues);
-router.post("/updateTrl/:userId", updateTrlValues);
-router.post("/createIdea/:userId", createIdea);
+router.get("/getTrl/:userId",isSignedIn, getTrlValues);
+router.post("/updateTrl/:userId",isSignedIn, updateTrlValues);
+router.post("/createIdea/:userId",isSignedIn, createIdea);
 //router.get("/getUserIdea/:userId", getIdeaOfUser);
 
-router.post("/idea/chooseBranch/:userId", getIdeaById,chooseBranch);
-router.get("/idea/otplogin/:userId",getIdeaById, otplogin);
-router.post("/idea/otpverify/:userId",getIdeaById, otpverify);
+router.post("/idea/chooseBranch/:userId",isSignedIn, getIdeaById,chooseBranch);
+router.get("/idea/otplogin/:userId",isSignedIn,getIdeaById, otplogin);
+router.post("/idea/otpverify/:userId",isSignedIn,getIdeaById, otpverify);
 
 
-router.get("/idea/clickStep2/:userId",getIdeaById,getStep2ById,exportMentorandOpenForm);
-router.post("/idea/createStep2/:userId",getIdeaById,getStep2ById,createStep2);
-router.get("/idea/getStep2/:userId",getStep2ById,getStep2);
+router.get("/idea/clickStep2/:userId",isSignedIn,getIdeaById,getStep2ById,exportMentorandOpenForm);
+router.post("/idea/createStep2/:userId",isSignedIn,getIdeaById,getStep2ById,createStep2);
+router.get("/idea/getStep2/:userId",isSignedIn,getStep2ById,getStep2);
 
 //router.get("/idea/getStep2/:userId",getIdeaById,getStep2ById,getStep2);
-router.get("/idea/clickStep3/:userId",getIdeaById,getStep3ById,exportStep2andOpenForm3);
+router.get("/idea/clickStep3/:userId",isSignedIn,getIdeaById,getStep3ById,exportStep2andOpenForm3);
 //router.post("/idea/createStep2/:userId",getIdeaById,getStep2ById,createStep2);
 //router.get("/idea/getStep2/:userId",getStep2ById,getStep2);
 
 
-router.get("/idea/dropIdea/:userId",getIdeaById, deleteIdea);
+router.get("/idea/dropIdea/:userId",isSignedIn,getIdeaById, deleteIdea);
 
 //Mentor Routes
+router.get("/getMentor/:mentorId",getMentorUser);
+router.get("/idea/getIdeas/:mentorId",getAllStep2);
+router.post("/idea/selectIdea/:mentorId",getStep2Id,selectIdea);
+router.post("/idea/editIdea/:mentorId",getStep2Id,editIdea);
 
 module.exports = router;
