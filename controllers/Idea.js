@@ -34,14 +34,20 @@ exports.getIdeaById = (req, res, next) => {
 };
 
 exports.getIdea = (req,res)=>{
-  console.log(req);
-  return res.json(
-    req.idea,
-  );
+  console.log(req.idea);
+  return res.json({
+    "Idea":req.idea,
+  });
 };
 
 exports.getStep2ById = (req, res, next) => {
-  console.log(req.idea);
+      //console.log(req.idea);
+      if(req.idea.status==="new-idea-created"){
+          return res.status(200).json({
+            "Idea":req.idea,
+            "Message":"You have not choose branch yet",
+          });
+      }
       if(req.idea.status==="branch-choosed"){
           return res.status(200).json({
             "Idea":req.idea,
@@ -56,35 +62,73 @@ exports.getStep2ById = (req, res, next) => {
         console.log("redirect to open form of Step2");
         next();
       }
-      if(req.idea.status==="under-reviewed" || req.idea.status==="reviewed" || req.idea.status==="under-verified" || req.idea.status==="verified"){
+      if(req.idea.status==="under-reviewed" || req.idea.status==="reviewed" || req.idea.status==="under-verified" || req.idea.status==="verified" || req.idea.status==="approved" || req.idea.status==="not-verified"){
           Step2.findById({ _id: req.idea.Step2 },(err, Step2) => {
-          if (err || !idea) {
+          if (err || !Step2) {
             return res.status(500).json({
               error: err || "Idea Not found",
             });
           }
-          console.log(Step2);
           req.step2 = Step2;
-          next();
+          return res.json({
+            "Step2":req.step2,
+            "Message":"Step2 already created above"
+          }
+          )
         });
       }
+};
 
-  // if(req.idea.status==="under-reviewed" || req.idea.status==="reviewed" || req.idea.status==="under-verified" || req.idea.status==="verified"){
-  //     Step2.findById({ _id: req.idea.Step2 },(err, Step2) => {
-  //     if (err || !idea) {
-  //       return res.status(500).json({
-  //         error: err || "Idea Not found",
-  //       });
-  //     }
-  //     console.log(Step2);
-  //     req.step2 = Step2;
-  //     next();
-  //   });
-  // }else{
-  
-  
-  // }
-  
+
+exports.getStep3ById = (req, res, next) => {
+  console.log(req.idea);
+      if(req.idea.status==="new-idea-created"){
+          return res.status(200).json({
+            "Idea":req.idea,
+            "Message":"You have not choose branch yet",
+          });
+      }
+      if(req.idea.status==="branch-choosed"){
+          return res.status(200).json({
+            "Idea":req.idea,
+            "Message":"Step1 not completed yet"
+          });
+      }
+      if(req.idea.status==="Step1-complete" || req.idea.status==="Step2-form-open"){
+          return res.status(200).json({
+            "Idea":req.idea,
+            "Message":"Complete your Step2"
+          });
+      }
+      if(req.idea.status==="under-reviewed"){
+         return res.status(200).json({
+            "Idea":req.idea,
+            "Message":"Step2 not reviewed yet"
+          });
+      }
+      if(req.idea.status==="reviewed" || req.idea.status==="approved"){
+        console.log("iam goin to open step3");
+        next();
+      }
+      if(req.idea.status==="Step3-form-open"){
+        console.log("redirect to open form of Step3");
+        next();
+      }
+      if(req.idea.status==="under-verified" || req.idea.status==="verified" || req.idea.status==="not-verified"){
+          Step3.findById({ _id: req.idea.Step3 },(err, Step3) => {
+          if (err || !Step3) {
+            return res.status(500).json({
+              error: err || "Idea Not found",
+            });
+          }
+          req.step3 = Step3;
+          return res.json({
+
+          }
+            
+          )
+        });
+      }
 };
 
 
@@ -112,10 +156,45 @@ exports.exportMentorandOpenForm = (req,res)=>{
     });
 }
 
+exports.exportStep2andOpenForm3 = (req,res)=>{
+    let step2Id = req.step2._id;
+    let mentorId = req.step2.Mentor._id;
+    let mentorInfo = {};
+    if(step2.review==="1"){
+         Mentor.find({_id:mentorId},(err,mentor)=>{
+        if(err || !mentor){
+          return res.status(500).json({
+            error: err || "Mentors not avaiable yet",
+          })
+        }
+        mentorInfo=mentor;        
+    });
+    }
+    Idea.findOneAndUpdate({_id:ideaId},{status:"Step3-form-open"},{new:true},(err,UpdatedIdea)=>{
+          if(err || !UpdatedIdea){
+              return res.status(500).json({
+              error: err || "Idea Not found",
+            });
+          }
+          return res.status(200).json({
+            "Mentor":mentorInfo,
+            "Idea":UpdatedIdea,
+            "Message":"Step2 form will open now",
+          });
+        });
+}
+
 exports.getStep2 = (req,res)=>{
   console.log(req);
   return res.json(
     req.step2,
+  )
+};
+
+exports.getStep3 = (req,res)=>{
+  console.log(req);
+  return res.json(
+    req.step3,
   )
 };
 
@@ -224,6 +303,12 @@ exports.otplogin = (req, res) => {
       "Message":"Branch not choosen"
     })
   }
+  if(req.idea.status!=="Step1-complete" || req.idea.status==="under-reviewed" || req.idea.status==="reviewed" || req.idea.status==="approved" || req.idea.status==="under-verified" || req.idea.status==="verified" || req.idea.status==="not-verified"){
+    return res.status(200).json({
+      "Idea":req.idea,
+      "Message":"You have already verified your number"
+    })
+  }
   else{
     if (req.profile.number) {
       console.log("got a number")
@@ -268,7 +353,14 @@ exports.otpverify = (req, res) => {
       "Idea":req.idea,
       "Message":"Branch not choosen"
     })
-  }else{
+  }
+  if(req.idea.status!=="Step1-complete" || req.idea.status==="under-reviewed" || req.idea.status==="reviewed" || req.idea.status==="approved" || req.idea.status==="under-verified" || req.idea.status==="verified" || req.idea.status==="not-verified"){
+    return res.status(200).json({
+      "Idea":req.idea,
+      "Message":"You have already verified your number"
+    })
+  }
+  else{
     if (req.body.code.length === 6 && req.idea.phonestatus==="pending") {
     console.log("inside this");
         client.verify
@@ -388,11 +480,16 @@ exports.chooseBranch = (req, res) => {
 
 
 exports.createStep2 = (req, res) => {
+  console.log("iamin create form");
+  console.log(req.idea);
+  console.log(req.idea._id);
+  console.log(req.body.mentorId);
   let underMentor=req.body.mentorId;
   let mainIdea=req.idea;
-  const step2 = new Step2();
+  console.log(req.body);
+  const step2 = new Step2(req.body);
         req.idea.Step2=undefined;
-        step2.underIdea=mainIdea;
+        step2.underIdea=mainIdea._id;
         step2.Mentor=underMentor;
         step2.save((err, step2) => {
           console.log(step2);
@@ -403,9 +500,9 @@ exports.createStep2 = (req, res) => {
           }
           Idea.findOneAndUpdate(
             { _id: req.idea._id },
-            { Step2:step2 },
+            {$set:{Step2:step2,status:"under-reviewed"}},
             { new: true },
-            (err, updateIdea) => {
+            (err, updatedIdea) => {
               console.log(updatedIdea);
               if (err) {
                 return res.status(400).json({
@@ -429,7 +526,7 @@ exports.createStep2 = (req, res) => {
                     }
                     return res.status(200).json({
                       "Step2":step2,
-                      "Idea":updateIdea,
+                      "Idea":updatedIdea,
                       "Mentor":underMentor,
                       "Message":"Created Fresh Step2",
                     });  

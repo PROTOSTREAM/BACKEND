@@ -121,6 +121,10 @@ getStep2ById,
 getStep2,
 exportMentorandOpenForm,
 createStep2,
+getStep3ById,
+getStep3,
+exportStep2andOpenForm3,
+createStep3
 } = require("../controllers/Idea");
 // const {
 //   createNewStartup,
@@ -197,7 +201,7 @@ const router = express.Router();
 //router.post("/nda/:ndaId/:userId", isSignedIn, isTBI, getNda); //NOT TESTED
 //router.patch("/verifynda/:ndaId/:userId", isSignedIn, isTBI, verifyNda); //NOT TESTED
 
-router.param("userId", getUserById,getIdeaById,getStep2ById);
+router.param("userId", getUserById,getIdeaById,getStep2ById,getStep3ById);
 router.param("tbiId", getTbiUserById);
 router.param("mentorId",getMentorUserById);
 //router.param("ideaId",getIdeaById);
@@ -220,12 +224,16 @@ router.post("/idea/otpverify/:userId",getIdeaById, otpverify);
 
 router.get("/idea/clickStep2/:userId",getIdeaById,getStep2ById,exportMentorandOpenForm);
 router.post("/idea/createStep2/:userId",getIdeaById,getStep2ById,createStep2);
+router.get("/idea/getStep2/:userId",getStep2ById,getStep2);
 
 //router.get("/idea/getStep2/:userId",getIdeaById,getStep2ById,getStep2);
+router.get("/idea/clickStep3/:userId",getIdeaById,getStep3ById,exportStep2andOpenForm3);
+//router.post("/idea/createStep2/:userId",getIdeaById,getStep2ById,createStep2);
+//router.get("/idea/getStep2/:userId",getStep2ById,getStep2);
 
 
 router.get("/idea/dropIdea/:userId",getIdeaById, deleteIdea);
 
-
+//Mentor Routes
 
 module.exports = router;
