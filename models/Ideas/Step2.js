@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Schema;
 
 const ReviewIdeaSchema = mongoose.Schema({
-  review: { type: String, default: 0 },
+  review: { type: String, default:"0" },
   Name: { type: String, default: undefined },
   MobNo: { type: Number, required: true },
   Email: String,

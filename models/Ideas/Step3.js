@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Schema;
 
 const VerifyIdeaSchema = mongoose.Schema({
-  verify: { default: undefined, type: String },
+  verify: { default: "0", type: String },
   comment: { default: undefined, type: String },
   photo: { default: undefined, type: Buffer },
   Gender: { default: undefined, type: String },
@@ -15,7 +15,7 @@ const VerifyIdeaSchema = mongoose.Schema({
   Q4: { default: undefined, type: String },
   Q5: { default: undefined, type: String },
   Q6: { default: undefined, type: String },
-  { default: undefined, type: String },
+  Q7: { default: undefined, type: String },
   uploadSign: Buffer,
   underIdea: { type: ObjectId, ref: "Idea" },
 });

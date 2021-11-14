@@ -127,8 +127,12 @@ exportStep2andOpenForm3,
 createStep3,
 getStep2Id,
 getAllStep2,
-selectIdea,
-editIdea
+selectIdea2,
+editIdea2,
+getStep3Id,
+getAllStep3,
+selectIdea3,
+editIdea3
 } = require("../controllers/Idea");
 // const {
 //   createNewStartup,
@@ -241,8 +245,8 @@ router.get("/idea/dropIdea/:userId",isSignedIn,getIdeaById, deleteIdea);
 //Mentor Routes
 router.get("/getMentor/:mentorId",getMentorUser);
 router.get("/idea/getIdeas/:mentorId",getAllStep2);
-router.post("/idea/selectIdea/:mentorId",getStep2Id,selectIdea);
-router.post("/idea/editIdea/:mentorId",getStep2Id,editIdea);
+router.post("/idea/selectIdea/:mentorId",getStep2Id,selectIdea2);
+router.post("/idea/editIdea/:mentorId",getStep2Id,editIdea2);
 
 //Tbi Routes
 router.get("/getTbi/:tbiId",getTbiUser);
