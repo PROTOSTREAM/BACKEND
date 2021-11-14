@@ -102,6 +102,7 @@ const upload = multer({ storage: multerStorage });
 
 const { getUserById, getUser } = require("../controllers/user");
 const { getMentorUserById, getMentorUser} = require("../controllers/mentors");
+const { getTbiUserById,getTbiUser } = require("../controllers/tbi");
 
 const { isSignedIn, isAuthenticated, isTBI, isMENTOR} = require("../controllers/auth");
 
@@ -206,6 +207,7 @@ const router = express.Router();
 
 router.param("userId", getUserById,getIdeaById,getStep2ById,getStep3ById);
 router.param("mentorId",getMentorUserById,getStep2Id);
+router.param("tbiId",getTbiUserById,getStep3Id);
 //router.param("ideaId",getIdeaById);
 
 
@@ -231,7 +233,7 @@ router.get("/idea/getStep2/:userId",isSignedIn,getStep2ById,getStep2);
 //router.get("/idea/getStep2/:userId",getIdeaById,getStep2ById,getStep2);
 router.get("/idea/clickStep3/:userId",isSignedIn,getIdeaById,getStep3ById,exportStep2andOpenForm3);
 router.post("/idea/createStep3/:userId",isSignedIn,getIdeaById,getStep3ById,createStep2);
-//router.get("/idea/getStep2/:userId",getStep2ById,getStep2);
+router.get("/idea/getStep3/:userId",isSignedIn,getStep3ById,getStep3);
 
 
 router.get("/idea/dropIdea/:userId",isSignedIn,getIdeaById, deleteIdea);
@@ -241,5 +243,11 @@ router.get("/getMentor/:mentorId",getMentorUser);
 router.get("/idea/getIdeas/:mentorId",getAllStep2);
 router.post("/idea/selectIdea/:mentorId",getStep2Id,selectIdea);
 router.post("/idea/editIdea/:mentorId",getStep2Id,editIdea);
+
+//Tbi Routes
+router.get("/getTbi/:tbiId",getTbiUser);
+router.get("/idea/getIdeas/:mentorId",getAllStep3);
+router.post("/idea/selectIdea/:mentorId",getStep3Id,selectIdea3);
+router.post("/idea/editIdea/:mentorId",getStep3Id,editIdea3);
 
 module.exports = router;

@@ -1,15 +1,16 @@
-const TbiUser = require("../models/tbi");
+const Tbi = require("../models/tbi");
 
 exports.getTbiUserById = (req, res, next, id) => {
   // console.log("in getUserById");
   // console.log(id);
-  TbiUser.findById(id).exec((err, user) => {
+  Tbi.findById(id).exec((err, user) => {
     if (err || !user) {
       return res.status(400).json({
         error: "No user was found in DB",
       });
     }
     req.profile = user;
+    console.log(req.profile);
     next();
   });
 };

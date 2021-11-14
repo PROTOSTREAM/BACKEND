@@ -4,6 +4,7 @@ const Idea = require("../models/Ideas/idea");
 const Step2 = require("../models/Ideas/Step2");
 const Step3 = require("../models/Ideas/Step3");
 const Mentor = require("../models/mentors");
+const Tbi = require("../models/tbi");
 const url = require('url');
 
 const client = require('twilio')(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
@@ -131,14 +132,6 @@ exports.getStep2ById = (req, res, next) => {
             "Message":"Step1 not completed yet"
           });
       }
-      if(req.idea.status==="Step1-complete"){
-        console.log("iam goin to open step2");
-        next();
-      }
-      if(req.idea.status==="Step2-form-open"){
-        console.log("redirect to open form of Step2");
-        next();
-      }
       if(req.idea.status==="under-reviewed" || req.idea.status==="reviewed" || req.idea.status==="under-verified" || req.idea.status==="verified" || req.idea.status==="approved" || req.idea.status==="not-verified"){
           Step2.findById({ _id: req.idea.Step2 },(err, Step2) => {
           if (err || !Step2) {
@@ -155,6 +148,15 @@ exports.getStep2ById = (req, res, next) => {
           )
         });
       }
+      if(req.idea.status==="Step2-form-open"){
+        console.log("redirect to open form of Step2");
+        next();
+      }
+      if(req.idea.status==="Step1-complete"){
+        console.log("iam goin to open step2");
+        next();
+      }
+      
 };
 
 
@@ -185,16 +187,6 @@ exports.getStep3ById = (req, res, next) => {
             "Message":"Step2 not reviewed yet"
           });
       }
-      
-      if(req.idea.status==="reviewed" || req.idea.status==="approved"){
-        console.log("iam goin to open step3");
-          req.step2Id=step2Id;
-          next();
-      }
-      if(req.idea.status==="Step3-form-open"){
-        console.log("redirect to open form of Step3");
-        next();
-      }
       if(req.idea.status==="under-verified" || req.idea.status==="verified" || req.idea.status==="not-verified"){
           Step3.findById({ _id: req.idea.Step3 },(err, Step3) => {
           if (err || !Step3) {
@@ -202,13 +194,24 @@ exports.getStep3ById = (req, res, next) => {
               error: err || "Idea Not found",
             });
           }
-
           req.step3 = Step3;
           return res.json({
-
+              "Idea":req.idea,
+              "Step2":req.step2,
+              "Message":"Step3 already created above"
           });
         });
       }
+      if(req.idea.status==="Step3-form-open"){
+        console.log("redirect to open form of Step3");
+        next();
+      }
+      if(req.idea.status==="reviewed" || req.idea.status==="approved"){
+        console.log("iam goin to open step3");
+          req.step2Id=step2Id;
+          next();
+      }
+      
 };
 
 
@@ -627,7 +630,7 @@ exports.createStep2 = (req, res) => {
                     return res.status(200).json({
                       "Step2":step2,
                       "Idea":updatedIdea,
-                      "Mentor":underMentor,
+                      "Mentor":updatedMentor,
                       "Message":"Created Fresh Step2",
                     });  
                   }
@@ -637,19 +640,63 @@ exports.createStep2 = (req, res) => {
             }
           );
         });
-
 };
 
 exports.createStep3 = (req, res) => {
-  step3 = new Step3(req.body);
-  step3.save().then((err, step) => {
-    if (err || !step) {
-      return res.status(500).json({
-        error: err || "Step2 Not Created!!",
-      });
-    }
-    return res.status(200).json(step);
-  });
+  console.log("iamin create form");
+  console.log(req.idea);
+  console.log(req.idea._id);
+  let mainIdea=req.idea;
+  console.log(req.body);
+  const step3 = new Step3(req.body);
+        req.idea.Step3=undefined;
+        step3.underIdea=mainIdea._id;
+        step3.save((err, step3) => {
+          console.log(step3);
+          if (err || !step3``) {
+            return res.status(500).json({
+              error: err || "Step3 cannot be created",
+            });
+          }
+          Idea.findOneAndUpdate(
+            { _id: req.idea._id },
+            {$set:{Step3:step3,status:"under-verified"}},
+            { new: true },
+            (err, updatedIdea) => {
+              console.log(updatedIdea);
+              if (err) {
+                return res.status(400).json({
+                  error: "Unable to save Step3",
+                });
+              }
+              else{
+                let arr_step3 = [];
+
+                arr_step3.push(step3);
+
+                Tbi.findOneAndUpdate(
+                  { _id: req.profile._id },
+                  { $push: { Ideas: arr_step3 } },
+                  { new: true },
+                  (err, updatedTbi) => {
+                    if (err) {
+                      return res.status(400).json({
+                        error: "Unable to send idea to Mentor",
+                      });
+                    }
+                    return res.status(200).json({
+                      "Step3":step3,
+                      "Idea":updatedIdea,
+                      "Tbi":updatedTbi,
+                      "Message":"Created Fresh Step3",
+                    });  
+                  }
+                );
+                      
+              }
+            }
+          );
+        });
 };
 
 //!Step3.
