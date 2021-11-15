@@ -56,7 +56,7 @@ exports.getAllStep3 = (req,res) =>{
 exports.selectIdea3 = (req,res) =>{
       console.log(req.step3);
         return res.json({
-          "Step2":req.step3,
+          "Step3":req.step3,
         });
 };
 
@@ -232,6 +232,13 @@ exports.getStep2ById = (req, res, next) => {
             "Message":"Step1 not completed yet"
           });
       }
+      if(req.idea.status==="Step3-form-open"){
+          return res.status(200).json({
+            "Idea":req.idea,
+            "Message":"Step2 already completed,Complete your Step3"
+          });
+      }
+      
       if(req.idea.status==="under-reviewed" || req.idea.status==="reviewed" || req.idea.status==="under-verified" || req.idea.status==="verified" || req.idea.status==="approved" || req.idea.status==="not-verified"){
           Step2.findById({ _id: req.idea.Step2 },(err, Step2) => {
           if (err || !Step2) {
@@ -507,7 +514,7 @@ exports.otplogin = (req, res) => {
       "Message":"Branch not choosen"
     })
   }
-  else if(req.idea.status==="Step1-complete" || req.idea.status==="under-reviewed" || req.idea.status==="reviewed" || req.idea.status==="approved" || req.idea.status==="under-verified" || req.idea.status==="verified" || req.idea.status==="not-verified"){
+  else if(req.idea.status==="Step1-complete" || req.idea.status==="under-reviewed" || req.idea.status==="reviewed" || req.idea.status==="approved" || req.idea.status==="under-verified" || req.idea.status==="verified" || req.idea.status==="not-verified"  || req.idea.status==="Step3-form-open"){
     return res.status(200).json({
       "Idea":req.idea,
       "Message":"You have already verified your number"
@@ -558,7 +565,7 @@ exports.otpverify = (req, res) => {
       "Message":"Branch not choosen"
     })
   }
-  else if(req.idea.status==="Step1-complete" || req.idea.status==="under-reviewed" || req.idea.status==="reviewed" || req.idea.status==="approved" || req.idea.status==="under-verified" || req.idea.status==="verified" || req.idea.status==="not-verified"){
+  else if(req.idea.status==="Step1-complete" || req.idea.status==="under-reviewed" || req.idea.status==="reviewed" || req.idea.status==="approved" || req.idea.status==="under-verified" || req.idea.status==="verified" || req.idea.status==="not-verified"  || req.idea.status==="Step3-form-open"){
     return res.status(200).json({
       "Idea":req.idea,
       "Message":"You have already verified your number"
@@ -754,7 +761,7 @@ exports.createStep3 = (req, res) => {
         step3.underIdea=mainIdea._id;
         step3.save((err, step3) => {
           console.log(step3);
-          if (err || !step3``) {
+          if (err || !step3) {
             return res.status(500).json({
               error: err || "Step3 cannot be created",
             });
@@ -776,7 +783,7 @@ exports.createStep3 = (req, res) => {
                 arr_step3.push(step3);
 
                 Tbi.findOneAndUpdate(
-                  { _id: req.profile._id },
+                  { _id: "618c029651196b4c500d3a9b" },
                   { $push: { Ideas: arr_step3 } },
                   { new: true },
                   (err, updatedTbi) => {

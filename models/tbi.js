@@ -62,7 +62,7 @@ const tbiSchema = mongoose.Schema({
     Ideas: [
       {
         type: ObjectId,
-        ref: "Step2",
+        ref: "Step3",
       },
     ], 
   },

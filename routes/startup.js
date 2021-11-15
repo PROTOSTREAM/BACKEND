@@ -236,7 +236,7 @@ router.get("/idea/getStep2/:userId",isSignedIn,getStep2ById,getStep2);
 
 //router.get("/idea/getStep2/:userId",getIdeaById,getStep2ById,getStep2);
 router.get("/idea/clickStep3/:userId",isSignedIn,getIdeaById,getStep3ById,exportStep2andOpenForm3);
-router.post("/idea/createStep3/:userId",isSignedIn,getIdeaById,getStep3ById,createStep2);
+router.post("/idea/createStep3/:userId",isSignedIn,getIdeaById,getStep3ById,createStep3);
 router.get("/idea/getStep3/:userId",isSignedIn,getStep3ById,getStep3);
 
 
@@ -244,14 +244,14 @@ router.get("/idea/dropIdea/:userId",isSignedIn,getIdeaById, deleteIdea);
 
 //Mentor Routes
 router.get("/getMentor/:mentorId",getMentorUser);
-router.get("/idea/getIdeas/:mentorId",getAllStep2);
+router.get("/idea/getMENTORIdeas/:mentorId",getAllStep2);
 router.post("/idea/selectIdea/:mentorId",getStep2Id,selectIdea2);
 router.post("/idea/editIdea/:mentorId",getStep2Id,editIdea2);
 
 //Tbi Routes
 router.get("/getTbi/:tbiId",getTbiUser);
-router.get("/idea/getIdeas/:mentorId",getAllStep3);
-router.post("/idea/selectIdea/:mentorId",getStep3Id,selectIdea3);
-router.post("/idea/editIdea/:mentorId",getStep3Id,editIdea3);
+router.get("/idea/getTBIIdeas/:tbiId",getAllStep3);
+router.post("/idea/selectIdea3/:tbiId",getStep3Id,selectIdea3);
+router.post("/idea/editIdea3/:tbiId",getStep3Id,editIdea3);
 
 module.exports = router;
