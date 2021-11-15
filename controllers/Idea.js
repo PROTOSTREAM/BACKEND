@@ -9,18 +9,13 @@ const url = require('url');
 
 const client = require('twilio')(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN);
 
-//PENDING
 
-/*   1. Createstep3
-    2. getstep3
-    3. getAllStep3
-    4. selectIdea3
-    5. editIdea3
-    take createstep3 tbi id by yourself
-*/
+//IDEA CONTROLLERS(TBI,USER,MENTORS)
 
 
-//!Idea..
+//TBI CONTROLLERS************************************
+
+
 exports.getStep3Id = (req,res,next) =>{
         let id = req.body.ideaId;  
         //console.log(id);
@@ -105,7 +100,9 @@ exports.editIdea3 = (req,res) =>{
 
 
 
-//Mentors Functionality
+//MENTOR CONTROLLERS*********************************
+
+
 exports.getStep2Id = (req,res,next) =>{
         let id = req.body.ideaId;  
         //console.log(id);
@@ -189,8 +186,13 @@ exports.editIdea2 = (req,res) =>{
 
 
 
-// USER FUNCTIONALITIES
-//user signin routes
+// USER CONTROLLERS*****************************
+
+
+
+//CREATE IDEA MIDDLEWARE******************
+
+
 exports.getIdeaById = (req, res, next) => {
   if(!(req.profile.startup)){
     return res.status(400).json({
@@ -217,6 +219,11 @@ exports.getIdea = (req,res)=>{
     "Idea":req.idea,
   });
 };
+
+
+
+//STEP:2 MIDDLEWARE***********************
+
 
 exports.getStep2ById = (req, res, next) => {
       //console.log(req.idea);
@@ -265,6 +272,9 @@ exports.getStep2ById = (req, res, next) => {
       }
       
 };
+
+
+// STEP:3 MIDDLEWARE***********************
 
 
 exports.getStep3ById = (req, res, next) => {
@@ -323,6 +333,10 @@ exports.getStep3ById = (req, res, next) => {
 };
 
 
+
+//STEP:2 ONCLICK STEP2 BUTTON FUNCTIONALITY**************
+
+
 exports.exportMentorandOpenForm = (req,res)=>{
     let ideaId = req.idea._id;
     let branch=req.idea.department;
@@ -346,6 +360,10 @@ exports.exportMentorandOpenForm = (req,res)=>{
         });
     });
 }
+
+
+//STEP:3 ONCLICK STEP3 BUTTON FUNCTIONALITY*************
+
 
 exports.exportStep2andOpenForm3 = (req,res)=>{
 
@@ -395,12 +413,20 @@ exports.exportStep2andOpenForm3 = (req,res)=>{
     });
 }
 
+
+
+//STEP:2 EXTRACT STEP2***********
+
+
 exports.getStep2 = (req,res)=>{
   console.log(req);
   return res.json(
     req.step2,
   )
 };
+
+
+//STEP:3 EXTRACT STEP3***********
 
 exports.getStep3 = (req,res)=>{
   console.log(req);
@@ -409,6 +435,8 @@ exports.getStep3 = (req,res)=>{
   )
 };
 
+
+//EXTRACT TRL VALUE FROM USER**********
 
 exports.getTrlValues = (req, res) => {
   User.findById({ _id: req.profile._id },function(err,user) {
@@ -425,6 +453,8 @@ exports.getTrlValues = (req, res) => {
 }
     
 
+//UPDATE TRL VALUE OF USER*************
+
 exports.updateTrlValues = (req, res) => {
   id = req.profile._id;
     console.log(id);
@@ -440,6 +470,10 @@ exports.updateTrlValues = (req, res) => {
     }
   );
 };
+
+
+//INITIATION OF IDEA- ONCLICK REGISTER IDEA FUNCTIONALITY*****
+
 
 exports.createIdea = (req, res) => {
   trlValue = req.profile.TRL_Test;
@@ -502,7 +536,9 @@ exports.createIdea = (req, res) => {
 
 
 
-//STEP-1
+//STEP-1********************
+
+
 exports.otplogin = (req, res) => {
   console.log(req.idea);
   console.log(req.profile.number);
@@ -660,6 +696,11 @@ exports.deleteIdea = (req, res) => {
   });
 };
 
+
+
+//STEP:0************************
+
+
 exports.chooseBranch = (req, res) => {
   console.log("inside choosen branch");
   
@@ -688,6 +729,8 @@ exports.chooseBranch = (req, res) => {
 };
 
 
+
+//STEP:2*******************************
 
 
 exports.createStep2 = (req, res) => {
@@ -750,6 +793,11 @@ exports.createStep2 = (req, res) => {
         });
 };
 
+
+//STEP:3***************************************
+
+
+
 exports.createStep3 = (req, res) => {
   console.log("iamin create form");
   console.log(req.idea);
@@ -807,29 +855,5 @@ exports.createStep3 = (req, res) => {
         });
 };
 
-//!Step3.
-
-exports.getStep3 = (req, res, id, next) => {
-  Step3.findById({ _id: id }).then((err, idea) => {
-    if (err || !idea) {
-      return res.status(500).json({
-        error: err || "Idea Not found",
-      });
-    }
-
-    res.Step3 = idea;
-    next();
-  });
-};
-
-
-
-
-//!Step2..
-
-exports.createReview = (req, res) => {};
-//!Step3...
-
-exports.updateIdea = (req, res) => {};
 
 
