@@ -134,42 +134,12 @@ getAllStep3,
 selectIdea3,
 editIdea3
 } = require("../controllers/Idea");
-// const {
-//   createNewStartup,
-//   readytoRegister,
-//   getStartupById,
-//   otplogin,
-//   otpverify,
-//   isSens,
-//   ndaUpload,
-//   findAllUserNdas,
-//   findAllNdas,
-//   getNda,
-//   getNdaById,
-//   verifyNda,
-//   isNdaVerify,
-//   internship,
-//   findAllStartups,
-// } = require("../controllers/startup");
 
-
-
-//const { createNewInternship } = require("../controllers/internship");
 
 const router = express.Router();
 
 
-//router.param("step3Id",getIdeaById,getStep3ById);
 
-//router.param("startupId", getStartupById);
-//router.param("ndaId", getNdaById);
-
-//router.use("/startup/createinternship/", isSens);
-
-// SENS ROUTES
-// router.get("/startup/:userId", isSignedIn, readytoRegister);
-// router.get("/startup/register/:userId", isSignedIn, otplogin);
-// router.post("/startup/verify/:userId", isSignedIn, otpverify);
 // router.post(
 //   "/startup/nda/upload/:userId",
 //   upload.single("uploadnda"),
@@ -178,7 +148,6 @@ const router = express.Router();
 //   ndaUpload
 // );
 
-//router.get("/startups/allstartups/:userId", findAllStartups);
 
 // REGISTER ROUTES
 // router.post(
@@ -189,32 +158,12 @@ const router = express.Router();
 //   isSignedIn,
 //   createNewStartup
 // );
-// router.post("/createstartup/:userId",upload.single('presentation'),
-//             // isSens,
-//             // isNdaVerify,
-//             isSignedIn,
-//             createNewStartup,
-// );                                                         // 2ND TEST REMAINS WITH isNdaVerify and :ndaId
-// router.post(
-//   "/register/internship/:startupId/:userId",
-//   isSignedIn,
-//   isSens,
-//   createNewInternship
-// ); //NOT TESTED
 
-//router.get("/myndas/:userId", isSignedIn, findAllUserNdas); //NOT TESTED
 
-//TBI ROUTES
-//router.post("/ndalist/:userId", isSignedIn, isTBI, findAllNdas); //NOT TESTED
-//router.post("/nda/:ndaId/:userId", isSignedIn, isTBI, getNda); //NOT TESTED
-//router.patch("/verifynda/:ndaId/:userId", isSignedIn, isTBI, verifyNda); //NOT TESTED
-
+//params
 router.param("userId", getUserById,getIdeaById,getStep2ById,getStep3ById);
 router.param("mentorId",getMentorUserById,getStep2Id);
 router.param("tbiId",getTbiUserById,getStep3Id);
-//router.param("ideaId",getIdeaById);
-
-
 
 
 //user routes
@@ -222,25 +171,24 @@ router.get("/getIdea/:userId",isSignedIn,getIdeaById,getIdea);
 
 router.get("/getTrl/:userId",isSignedIn, getTrlValues);
 router.post("/updateTrl/:userId",isSignedIn, updateTrlValues);
+
 router.post("/createIdea/:userId",isSignedIn, createIdea);
-//router.get("/getUserIdea/:userId", getIdeaOfUser);
 
 router.post("/idea/chooseBranch/:userId",isSignedIn, getIdeaById,chooseBranch);
+
 router.get("/idea/otplogin/:userId",isSignedIn,getIdeaById, otplogin);
 router.post("/idea/otpverify/:userId",isSignedIn,getIdeaById, otpverify);
-
 
 router.get("/idea/clickStep2/:userId",isSignedIn,getIdeaById,getStep2ById,exportMentorandOpenForm);
 router.post("/idea/createStep2/:userId",isSignedIn,getIdeaById,getStep2ById,createStep2);
 router.get("/idea/getStep2/:userId",isSignedIn,getStep2ById,getStep2);
 
-//router.get("/idea/getStep2/:userId",getIdeaById,getStep2ById,getStep2);
 router.get("/idea/clickStep3/:userId",isSignedIn,getIdeaById,getStep3ById,exportStep2andOpenForm3);
 router.post("/idea/createStep3/:userId",isSignedIn,getIdeaById,getStep3ById,createStep3);
 router.get("/idea/getStep3/:userId",isSignedIn,getStep3ById,getStep3);
 
-
 router.get("/idea/dropIdea/:userId",isSignedIn,getIdeaById, deleteIdea);
+
 
 //Mentor Routes
 router.get("/getMentor/:mentorId",getMentorUser);
