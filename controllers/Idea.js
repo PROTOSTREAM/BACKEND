@@ -80,7 +80,9 @@ exports.editIdea3 = (req,res) =>{
               if(tbiReviewValue==="verified"){
                   value="1";
               }
-       
+              if(tbiReviewValue==="not-verified"){
+                  value="-1";
+              }
                 Step3.findOneAndUpdate({_id:step3Id},{verify:value},{new:true},(err,UpdatedStep3)=>{
                       if(err || !UpdatedStep3){
                           return res.status(500).json({
@@ -165,6 +167,9 @@ exports.editIdea2 = (req,res) =>{
             });
           }     if(mentorReviewValue==="approved"){
                     value="1";
+                }
+                if(mentorReviewValue==="reviewed"){
+                    value="-1";
                 }
                 Step2.findOneAndUpdate({_id:step2Id},{review:value},{new:true},(err,UpdatedStep2)=>{
                       if(err || !UpdatedStep2){
