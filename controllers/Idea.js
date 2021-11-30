@@ -29,16 +29,32 @@ exports.createSlot = (req,res)=>{
               error: err || "Step3 Not found",
             });
     }
-    let session=Idea.session;
-    if(session===undefined){
-      let createSession={
-        
+    else{
+       let data={
+        Slot:slot_no,
+        Attend:"Pending",
+        Feedback:"Nothing",
+        Comment:"Nothing",
       }
-    }
-    console.log(session);
-    console.log(slot_no);
-  })
+      let session=Idea.Session;
+      if(session.length===0){
+          session.push(data);  
+          Idea.findByIdAndUpdate({_id:ideaId},{Session:session},{new:true},(err,UpdatedIdea)=>{
+            if(err || !UpdatedIdea){
+                return res.status(500).json({
+                error: err || "Idea Not found",
+              });
+            }
+            return res.status(200).json({
+                idea:UpdatedIdea,
+                message:"slot created"
+            })   
+          });
+      } 
+    }  
+  });
 }
+
 
 exports.getStep3Id = (req,res,next) =>{
         let id = req.body.ideaId;  
