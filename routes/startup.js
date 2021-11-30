@@ -132,7 +132,8 @@ editIdea2,
 getStep3Id,
 getAllStep3,
 selectIdea3,
-editIdea3
+editIdea3,
+createSlot
 } = require("../controllers/Idea");
 
 
@@ -201,5 +202,8 @@ router.get("/getTbi/:tbiId",getTbiUser);
 router.get("/idea/getTBIIdeas/:tbiId",getAllStep3);
 router.post("/idea/selectIdea3/:tbiId",getStep3Id,selectIdea3);
 router.post("/idea/editIdea3/:tbiId",getStep3Id,editIdea3);
+router.post("/idea/createSlot/:tbiId",getStep3Id,createSlot);
+
+
 
 module.exports = router;

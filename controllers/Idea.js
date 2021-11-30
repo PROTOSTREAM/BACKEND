@@ -15,6 +15,30 @@ const client = require('twilio')(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN
 
 //TBI CONTROLLERS************************************
 
+exports.ideaProgress = (req,res)=>{
+
+}
+
+
+exports.createSlot = (req,res)=>{
+  let ideaId = req.step3.underIdea;
+  let slot_no = req.body.Slot;
+  Idea.findById({_id:ideaId},(err,Idea)=>{
+    if(err|| !Idea){
+      return res.status(500).json({
+              error: err || "Step3 Not found",
+            });
+    }
+    let session=Idea.session;
+    if(session===undefined){
+      let createSession={
+        
+      }
+    }
+    console.log(session);
+    console.log(slot_no);
+  })
+}
 
 exports.getStep3Id = (req,res,next) =>{
         let id = req.body.ideaId;  
@@ -31,6 +55,7 @@ exports.getStep3Id = (req,res,next) =>{
           next();
         });
 }
+
 
 exports.getAllStep3 = (req,res) =>{
    Tbi.findById({ _id: req.profile._id })
