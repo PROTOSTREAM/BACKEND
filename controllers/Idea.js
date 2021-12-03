@@ -395,7 +395,7 @@ exports.getStep3ById = (req, res, next) => {
 exports.exportMentorandOpenForm = (req,res)=>{
     let ideaId = req.idea._id;
     let branch=req.idea.department;
-    Mentor.find({department:"eee"},(err,mentors)=>{
+    Mentor.find({department:branch},(err,mentors)=>{
         if(err || !mentors){
           return res.status(500).json({
             error: err || "Mentors not avaiable yet",
@@ -406,6 +406,9 @@ exports.exportMentorandOpenForm = (req,res)=>{
               return res.status(500).json({
               error: err || "Idea Not found",
             });
+          }
+          for(i=0;i<mentors.length;i++){
+            mentors[i].password="";
           }
           return res.status(200).json({
             "Mentor":mentors,

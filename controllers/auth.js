@@ -183,7 +183,7 @@ exports.register = (req, res) => {
       let testemail = req.body.email;
       let data = _.capitalize(testemail).split(".");
       let proname = data[0];
-      let branch = data[1].split("@")[0];
+      let branch = _.lowerCase(data[1].split("@")[0]);
       let profiledata = {
         Profilename: proname,
       };
