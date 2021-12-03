@@ -60,15 +60,24 @@ exports.getStep3Id = (req,res,next) =>{
         let id = req.body.ideaId;  
         //console.log(id);
         console.log(req.profile._id);
-        Step3.findById({ _id: id },(err, Step3) => {
+        Step3.findById({ _id: id},(err, Step3) => {
           if (err || !Step3) {
             return res.status(500).json({
               error: err || "Step3 Not found",
             });
           }
-          req.step3 = Step3;
+          Idea.findById({_id:Step3.underIdea},(err,Idea)=>{
+            if(err || !Idea){
+              return res.status(500).json({
+                error: "IDea of step3 not found",
+              })
+            }
+            req.step3 = Step3;
+            req.Idea = Idea;
+            next();
+          });
           //console.log(req.step2);
-          next();
+          
         });
 }
 
