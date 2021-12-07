@@ -19,6 +19,9 @@ const tbiSchema = mongoose.Schema({
       type: Number,
       required: true,
     },
+    provided_slots:{
+      type:Array
+    },
     // hackathons: [
     //   {
     //     type: ObjectId,

@@ -13,46 +13,109 @@ const client = require('twilio')(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN
 //IDEA CONTROLLERS(TBI,USER,MENTORS)
 
 
+//FUTURE WORK-  EDIT SLOT, TBI TASKS, FEEDBACK PAGE OF TBI, 
+
 //TBI CONTROLLERS************************************
 
 exports.ideaProgress = (req,res)=>{
 
 }
 
+exports.updateAttendance = (req,res)=>{
+  let ideaId = req.Idea._id;
+  let coming_attendance=req.body.attend;
+}
+
+
+exports.checkSlot = (req,res)=>{
+  let coming_slot=req.body.check_slot;
+  let recent_slots=req.profile.provided_slots;
+
+     //console.log(recent_slots);
+      let value=recent_slots.includes(coming_slot);
+      if(value===false){
+        console.log("Approved");
+          Tbi.findByIdAndUpdate({_id:req.profile._id},{$push:{provided_slots:coming_slot}},{new:true},(err,UpdatedTBI)=>{
+            if(err || !UpdatedTBI){
+                return res.status(500).json({
+                error: err || "Idea Not found",
+              });
+            }
+            console.log(UpdatedTBI);
+            return res.status(200).json({
+                message:"Slot available"
+            })   
+          });
+      }
+      else{
+        return res.status(404).json({
+          msg: "Slot not available"
+        })
+      }
+}
+
+exports.checkAttendanceSlot = (req,res)=>{
+  let coming_slot=req.body.check_slot;
+  let recent_slots=req.profile.provided_slots;
+     //console.log(recent_slots);
+      let value=recent_slots.includes(coming_slot);
+      if(value===false){
+            return res.status(200).json({
+                message:"Slot not Found"
+            });
+      }
+      else{
+
+        Idea.find({'Session.Slot':coming_slot},(err,Ideas)=>{
+          if(err || !Ideas){
+            return res.status(500).json({
+              error: err || "Ideas not found"
+            });
+          }
+          console.log(Ideas[0].Session)
+          return res.json({
+            Idea_List: Ideas,
+            msg: "found",
+          })
+        })
+      }
+}
 
 exports.createSlot = (req,res)=>{
-  let ideaId = req.step3.underIdea;
+  let ideaId = req.Idea._id;
   let slot_no = req.body.Slot;
-  Idea.findById({_id:ideaId},(err,Idea)=>{
-    if(err|| !Idea){
-      return res.status(500).json({
-              error: err || "Step3 Not found",
-            });
-    }
-    else{
+
        let data={
         Slot:slot_no,
         Attend:"Pending",
         Feedback:"Nothing",
         Comment:"Nothing",
       }
-      let session=Idea.Session;
-      if(session.length===0){
-          session.push(data);  
-          Idea.findByIdAndUpdate({_id:ideaId},{Session:session},{new:true},(err,UpdatedIdea)=>{
+      //let session=req.Idea.Session;
+      //console.log(session);
+          //session.push(data);      
+
+          Idea.findByIdAndUpdate({_id:ideaId},{$push:{Session:data}},{new:true},(err,UpdatedIdea)=>{
             if(err || !UpdatedIdea){
                 return res.status(500).json({
                 error: err || "Idea Not found",
               });
             }
-            return res.status(200).json({
-                idea:UpdatedIdea,
-                message:"slot created"
-            })   
+            let val_string="provided_slots["+slot_no+"]";
+            Tbi.findByIdAndUpdate({_id:req.profile._id},{$push:{val_string:UpdatedIdea._id}},{new:true},(err,UpdatedTBI)=>{
+              if(err || !UpdatedTBI){
+                  return res.status(500).json({
+                  error: err || "Idea Not found",
+                });
+              }
+              console.log(UpdatedTBI);
+              return res.status(200).json({
+                  Idea:UpdatedIdea,
+                  Tbi:UpdatedTBI,
+                  message:"Slot Created"
+              })   
+            });
           });
-      } 
-    }  
-  });
 }
 
 
@@ -72,8 +135,10 @@ exports.getStep3Id = (req,res,next) =>{
                 error: "IDea of step3 not found",
               })
             }
+            
             req.step3 = Step3;
             req.Idea = Idea;
+            console.log(req.Idea);
             next();
           });
           //console.log(req.step2);

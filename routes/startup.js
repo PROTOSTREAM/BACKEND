@@ -133,33 +133,14 @@ getStep3Id,
 getAllStep3,
 selectIdea3,
 editIdea3,
-createSlot
+createSlot,
+checkSlot,
+updateAttendance,
+checkAttendanceSlot
 } = require("../controllers/Idea");
 
 
 const router = express.Router();
-
-
-
-// router.post(
-//   "/startup/nda/upload/:userId",
-//   upload.single("uploadnda"),
-//   isSens,
-//   isSignedIn,
-//   ndaUpload
-// );
-
-
-// REGISTER ROUTES
-// router.post(
-//   "/createstartup/:ndaId/:userId",
-//   upload.single("presentation"),
-//   isSens,
-//   isNdaVerify,
-//   isSignedIn,
-//   createNewStartup
-// );
-
 
 //params
 router.param("userId", getUserById,getIdeaById,getStep2ById,getStep3ById);
@@ -203,7 +184,31 @@ router.get("/idea/getTBIIdeas/:tbiId",getAllStep3);
 router.post("/idea/selectIdea3/:tbiId",getStep3Id,selectIdea3);
 router.post("/idea/editIdea3/:tbiId",getStep3Id,editIdea3);
 router.post("/idea/createSlot/:tbiId",getStep3Id,createSlot);
-
+router.post("/idea/checkSlot/:tbiId",checkSlot);
+router.post("/idea/checkAttendanceSlot/:tbiId",checkAttendanceSlot);
+//router.post("/idea/updateAttendance/:tbiId",getStep3Id,updateAttendance);
 
 
 module.exports = router;
+
+
+
+
+// router.post(
+//   "/startup/nda/upload/:userId",
+//   upload.single("uploadnda"),
+//   isSens,
+//   isSignedIn,
+//   ndaUpload
+// );
+
+
+// REGISTER ROUTES
+// router.post(
+//   "/createstartup/:ndaId/:userId",
+//   upload.single("presentation"),
+//   isSens,
+//   isNdaVerify,
+//   isSignedIn,
+//   createNewStartup
+// );
