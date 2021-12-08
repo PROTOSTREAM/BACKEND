@@ -23,7 +23,19 @@ exports.ideaProgress = (req,res)=>{
 
 exports.updateAttendance = (req,res)=>{
   let ideaId = req.Idea._id;
-  let coming_attendance=req.body.attend;
+  let coming_attendance=req.body.attend;      //value=present/absent
+  let coming_slot=req.body.slot_no;
+  Idea.updateOne({_id:ideaId,"Session.Slot":coming_slot},{$set:{"Session.$.Attend":coming_attendance}},{new:true},(err,UpdatedIdea)=>{
+            if(err || !UpdatedIdea){
+                return res.status(500).json({
+                error: err || "Attendance not updated",
+              });
+            }
+              return res.status(200).json({
+                  Idea:UpdatedIdea,
+                  message:"Attendance Updated"
+              })   
+          });
 }
 
 
@@ -65,7 +77,7 @@ exports.checkAttendanceSlot = (req,res)=>{
             });
       }
       else{
-
+        console.log(coming_slot)
         Idea.find({'Session.Slot':coming_slot},(err,Ideas)=>{
           if(err || !Ideas){
             return res.status(500).json({
@@ -101,20 +113,10 @@ exports.createSlot = (req,res)=>{
                 error: err || "Idea Not found",
               });
             }
-            let val_string="provided_slots["+slot_no+"]";
-            Tbi.findByIdAndUpdate({_id:req.profile._id},{$push:{val_string:UpdatedIdea._id}},{new:true},(err,UpdatedTBI)=>{
-              if(err || !UpdatedTBI){
-                  return res.status(500).json({
-                  error: err || "Idea Not found",
-                });
-              }
-              console.log(UpdatedTBI);
               return res.status(200).json({
                   Idea:UpdatedIdea,
-                  Tbi:UpdatedTBI,
                   message:"Slot Created"
               })   
-            });
           });
 }
 

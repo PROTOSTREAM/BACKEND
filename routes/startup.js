@@ -186,7 +186,7 @@ router.post("/idea/editIdea3/:tbiId",getStep3Id,editIdea3);
 router.post("/idea/createSlot/:tbiId",getStep3Id,createSlot);
 router.post("/idea/checkSlot/:tbiId",checkSlot);
 router.post("/idea/checkAttendanceSlot/:tbiId",checkAttendanceSlot);
-//router.post("/idea/updateAttendance/:tbiId",getStep3Id,updateAttendance);
+router.post("/idea/updateAttendance/:tbiId",getStep3Id,updateAttendance);
 
 
 module.exports = router;
