@@ -15,11 +15,165 @@ const client = require('twilio')(process.env.ACCOUNT_SID, process.env.AUTH_TOKEN
 
 //FUTURE WORK-  EDIT SLOT, TBI TASKS, FEEDBACK PAGE OF TBI, 
 
+
+exports.ideaProgressPage = (req,res)=>{
+      let ideaId=req.body.ideaId;
+      if(req.profile.role===0){
+        Idea.findById({ _id: ideaId },function(err,Idea) {
+            if(err||!Idea){
+              console.log("error",err);
+                return res.status(400).json({
+                  error: err || "Idea not found",
+                });
+            }
+                return res.status(200).json({
+                  "Idea": Idea,
+                  "User": "STUDENT"
+                });
+          });          
+      }
+      if(req.profile.role===2){
+        Idea.findById({ _id: ideaId },function(err,Idea) {
+            if(err||!Idea){
+              console.log("error",err);
+                return res.status(400).json({
+                  error: err || "Idea not found",
+                });
+            }
+                return res.status(200).json({
+                  "Idea": Idea,
+                  "User": "TBI"
+                });
+          });          
+      }
+      if(req.profile.role===3){
+        Idea.findById({ _id: ideaId },function(err,Idea) {
+            if(err||!Idea){
+              console.log("error",err);
+                return res.status(400).json({
+                  error: err || "Idea not found",
+                });
+            }
+                return res.status(200).json({
+                  "Idea": Idea,
+                  "User": "MENTOR"
+                });
+          });          
+      }
+      else{
+         return res.status(404).json({
+                  "message":"No idea found",
+                });
+      }
+}
+
+
+
+exports.showAllFeedback = (req,res)=>{
+  let ideaId = req.Idea._id;
+  let coming_attendance=req.body.attend;      //value=present/absent
+  let coming_slot=req.body.slot_no;
+  Idea.updateOne({_id:ideaId,"Session.Slot":coming_slot},{$set:{"Session.$.Attend":coming_attendance}},{new:true},(err,UpdatedIdea)=>{
+            if(err || !UpdatedIdea){
+                return res.status(500).json({
+                error: err || "Attendance not updated",
+              });
+            }
+              return res.status(200).json({
+                  Idea:UpdatedIdea,
+                  message:"Attendance Updated"
+              })   
+          });
+}
+
+exports.updateFeedback = (req,res)=>{
+  let ideaId = req.Idea._id;
+  let coming_attendance=req.body.attend;      //value=present/absent
+  let coming_slot=req.body.slot_no;
+  Idea.updateOne({_id:ideaId,"Session.Slot":coming_slot},{$set:{"Session.$.Attend":coming_attendance}},{new:true},(err,UpdatedIdea)=>{
+            if(err || !UpdatedIdea){
+                return res.status(500).json({
+                error: err || "Attendance not updated",
+              });
+            }
+              return res.status(200).json({
+                  Idea:UpdatedIdea,
+                  message:"Attendance Updated"
+              })   
+          });
+}
+
+exports.updateComment = (req,res)=>{
+  let ideaId = req.Idea._id;
+  let coming_attendance=req.body.attend;      //value=present/absent
+  let coming_slot=req.body.slot_no;
+  Idea.updateOne({_id:ideaId,"Session.Slot":coming_slot},{$set:{"Session.$.Attend":coming_attendance}},{new:true},(err,UpdatedIdea)=>{
+            if(err || !UpdatedIdea){
+                return res.status(500).json({
+                error: err || "Attendance not updated",
+              });
+            }
+              return res.status(200).json({
+                  Idea:UpdatedIdea,
+                  message:"Attendance Updated"
+              })   
+          });
+}
+
+
+exports.milestoneProgress=(req,res)=>{
+  let coming_message=req.body.message;
+      if(req.profile.role===0){
+        Idea.findById({ _id: ideaId },function(err,Idea) {
+            if(err||!Idea){
+              console.log("error",err);
+                return res.status(400).json({
+                  error: err || "Idea not found",
+                });
+            }
+                return res.status(200).json({
+                  "Idea": Idea,
+                  "User": "STUDENT"
+                });
+          });          
+      }
+      if(req.profile.role===2){
+        Idea.findById({ _id: ideaId },function(err,Idea) {
+            if(err||!Idea){
+              console.log("error",err);
+                return res.status(400).json({
+                  error: err || "Idea not found",
+                });
+            }
+                return res.status(200).json({
+                  "Idea": Idea,
+                  "User": "TBI"
+                });
+          });          
+      }
+      if(req.profile.role===3){
+        Idea.findById({ _id: ideaId },function(err,Idea) {
+            if(err||!Idea){
+              console.log("error",err);
+                return res.status(400).json({
+                  error: err || "Idea not found",
+                });
+            }
+                return res.status(200).json({
+                  "Idea": Idea,
+                  "User": "MENTOR"
+                });
+          });          
+      }
+      else{
+         return res.status(404).json({
+                  "message":"No idea found",
+                });
+      }
+}
+
 //TBI CONTROLLERS************************************
 
-exports.ideaProgress = (req,res)=>{
-
-}
 
 exports.updateAttendance = (req,res)=>{
   let ideaId = req.Idea._id;
@@ -37,6 +191,9 @@ exports.updateAttendance = (req,res)=>{
               })   
           });
 }
+
+
+
 
 
 exports.checkSlot = (req,res)=>{

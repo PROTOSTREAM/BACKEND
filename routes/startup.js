@@ -136,7 +136,12 @@ editIdea3,
 createSlot,
 checkSlot,
 updateAttendance,
-checkAttendanceSlot
+checkAttendanceSlot,
+ideaProgressPage,
+updateFeedback,
+updateComment,
+showAllFeedback,
+milestoneProgress
 } = require("../controllers/Idea");
 
 
@@ -187,6 +192,22 @@ router.post("/idea/createSlot/:tbiId",getStep3Id,createSlot);
 router.post("/idea/checkSlot/:tbiId",checkSlot);
 router.post("/idea/checkAttendanceSlot/:tbiId",checkAttendanceSlot);
 router.post("/idea/updateAttendance/:tbiId",getStep3Id,updateAttendance);
+
+
+//Startup Routes
+
+router.get("/startup/getStartup/user/:userId",ideaProgressPage);
+router.get("/startup/getStartup/tbi/:tbiId",ideaProgressPage);
+router.get("/startup/getStartup/mentor/:mentorId",ideaProgressPage);
+
+router.post("/startup/updateFeedback/:userId",updateFeedback);
+router.post("/startup/updateFeedback/:tbiId",updateComment);
+
+router.post("/startup/updateFeedback/:tbiId",showAllFeedback);
+
+router.post("/startup/milestone/student/:userId",milestoneProgress);
+router.post("/startup/milestone/tbi/:tbiId",milestoneProgress);
+router.post("/startup/milestone/mentor/:mentorId",milestoneProgress);
 
 
 module.exports = router;

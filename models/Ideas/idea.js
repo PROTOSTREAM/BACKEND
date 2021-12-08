@@ -10,7 +10,8 @@ const ideaSchema = mongoose.Schema({
   Step2: { type: ObjectId, default: undefined, ref: "Step2" },
   Step3: { type: ObjectId, default: undefined, ref: "Step3" },
   Startup_Readiness: { type: ObjectId, ref: "Mentors" },
-  Session: {type: Array}
+  Session: {type: Array},
+  Milestone:{type: Array}
 });
 
 module.exports = mongoose.model("Idea", ideaSchema);
