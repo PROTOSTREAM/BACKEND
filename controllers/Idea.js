@@ -73,7 +73,7 @@ exports.showAllFeedback = (req,res)=>{
   let ideaId = req.Idea._id;
   let coming_attendance=req.body.attend;      //value=present/absent
   let coming_slot=req.body.slot_no;
-  Idea.updateOne({_id:ideaId,"Session.Slot":coming_slot},{$set:{"Session.$.Attend":coming_attendance}},{new:true},(err,UpdatedIdea)=>{
+  Idea.updateOne({_id:ideaId,"Session.Slot":coming_slot},{$set:{"Session.$.":coming_attendance}},{new:true},(err,UpdatedIdea)=>{
             if(err || !UpdatedIdea){
                 return res.status(500).json({
                 error: err || "Attendance not updated",
@@ -87,35 +87,35 @@ exports.showAllFeedback = (req,res)=>{
 }
 
 exports.updateFeedback = (req,res)=>{
-  let ideaId = req.Idea._id;
-  let coming_attendance=req.body.attend;      //value=present/absent
+  let ideaId = req.body.ideaId;
+  let coming_feedback=req.body.feedback;      //value=student feedback
   let coming_slot=req.body.slot_no;
-  Idea.updateOne({_id:ideaId,"Session.Slot":coming_slot},{$set:{"Session.$.Attend":coming_attendance}},{new:true},(err,UpdatedIdea)=>{
+  Idea.updateOne({_id:ideaId,"Session.Slot":coming_slot},{$set:{"Session.$.Feedback":coming_feedback}},{new:true},(err,UpdatedIdea)=>{
             if(err || !UpdatedIdea){
                 return res.status(500).json({
-                error: err || "Attendance not updated",
+                error: err || "Feedback not updated",
               });
             }
               return res.status(200).json({
                   Idea:UpdatedIdea,
-                  message:"Attendance Updated"
+                  message:"Feedback Updated"
               })   
           });
 }
 
 exports.updateComment = (req,res)=>{
-  let ideaId = req.Idea._id;
-  let coming_attendance=req.body.attend;      //value=present/absent
+  let ideaId = req.body.ideaId;
+  let coming_comment=req.body.comment;      //value=tbi comment on feedback
   let coming_slot=req.body.slot_no;
-  Idea.updateOne({_id:ideaId,"Session.Slot":coming_slot},{$set:{"Session.$.Attend":coming_attendance}},{new:true},(err,UpdatedIdea)=>{
+  Idea.updateOne({_id:ideaId,"Session.Slot":coming_slot},{$set:{"Session.$.Comment":coming_comment}},{new:true},(err,UpdatedIdea)=>{
             if(err || !UpdatedIdea){
                 return res.status(500).json({
-                error: err || "Attendance not updated",
+                error: err || "Comment not updated",
               });
             }
               return res.status(200).json({
                   Idea:UpdatedIdea,
-                  message:"Attendance Updated"
+                  message:"Comment Updated"
               })   
           });
 }
@@ -124,17 +124,22 @@ exports.updateComment = (req,res)=>{
 exports.milestoneProgress=(req,res)=>{
   let coming_message=req.body.message;
       if(req.profile.role===0){
-        Idea.findById({ _id: ideaId },function(err,Idea) {
-            if(err||!Idea){
-              console.log("error",err);
-                return res.status(400).json({
-                  error: err || "Idea not found",
-                });
+        let data={
+        Number:milestone_no,
+        Student:"Nothing",
+        Mentor:"Nothing",
+        Tbi:"Nothing",
+      }
+      Idea.findByIdAndUpdate({_id:ideaId},{$push:{Milestone:data}},{new:true},(err,UpdatedIdea)=>{
+            if(err || !UpdatedIdea){
+                return res.status(500).json({
+                error: err || "Milestone not updated",
+              });
             }
-                return res.status(200).json({
-                  "Idea": Idea,
-                  "User": "STUDENT"
-                });
+              return res.status(200).json({
+                  Idea:UpdatedIdea,
+                  message:"Milestone updated by Student"
+              })   
           });          
       }
       if(req.profile.role===2){
@@ -328,6 +333,45 @@ exports.selectIdea3 = (req,res) =>{
           "Step3":req.step3,
         });
 };
+
+
+exports.openIdea = (req,res) =>{
+    let ideaId = req.step3.underIdea;
+    let step3Id = req.step3._id;
+ //value===not-verified/verified
+    console.log(ideaId);
+    console.log()
+    // if(req.step3.verify!=="not-verified" && req.step3.verify!=="verified"){
+
+    // }
+    // else{
+    //   return res.status(200).json({
+    //       "Step3":req.step3,
+    //       "Message":"Already updated"
+    //   });
+    // }
+        Idea.find({_id:ideaId},(err,UpdatedIdea)=>{
+          if(err || !UpdatedIdea){
+              return res.status(500).json({
+              error: err || "Idea Not found",
+            });
+          }
+              
+                Step3.find({_id:step3Id},(err,UpdatedStep3)=>{
+                      if(err || !UpdatedStep3){
+                          return res.status(500).json({
+                          error: err || "Idea Not found",
+                        });
+                      }
+                     return res.status(200).json({
+                        "Step3":UpdatedStep3,
+                        "Idea":UpdatedIdea,
+                        "Message":"Startup Dashboard form will open now",
+                        "Action":"Idea got verified"
+                      });
+                });
+        });
+}
 
 exports.editIdea3 = (req,res) =>{
     let ideaId = req.step3.underIdea;

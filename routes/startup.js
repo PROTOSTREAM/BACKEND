@@ -132,6 +132,7 @@ editIdea2,
 getStep3Id,
 getAllStep3,
 selectIdea3,
+openIdea,
 editIdea3,
 createSlot,
 checkSlot,
@@ -187,6 +188,7 @@ router.post("/idea/editIdea/:mentorId",getStep2Id,editIdea2);
 router.get("/getTbi/:tbiId",getTbiUser);
 router.get("/idea/getTBIIdeas/:tbiId",getAllStep3);
 router.post("/idea/selectIdea3/:tbiId",getStep3Id,selectIdea3);
+router.post("/idea/openIdea/:tbiId",getStep3Id,openIdea);
 router.post("/idea/editIdea3/:tbiId",getStep3Id,editIdea3);
 router.post("/idea/createSlot/:tbiId",getStep3Id,createSlot);
 router.post("/idea/checkSlot/:tbiId",checkSlot);
@@ -201,9 +203,9 @@ router.get("/startup/getStartup/tbi/:tbiId",ideaProgressPage);
 router.get("/startup/getStartup/mentor/:mentorId",ideaProgressPage);
 
 router.post("/startup/updateFeedback/:userId",updateFeedback);
-router.post("/startup/updateFeedback/:tbiId",updateComment);
+router.post("/startup/updateComment/:tbiId",updateComment);
 
-router.post("/startup/updateFeedback/:tbiId",showAllFeedback);
+router.post("/startup/showFeedbacks/:tbiId",showAllFeedback);
 
 router.post("/startup/milestone/student/:userId",milestoneProgress);
 router.post("/startup/milestone/tbi/:tbiId",milestoneProgress);
