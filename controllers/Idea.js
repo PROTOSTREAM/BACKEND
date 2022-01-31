@@ -374,7 +374,7 @@ exports.openIdea = (req,res) =>{
 }
 
 exports.editIdea3 = (req,res) =>{
-    let ideaId = req.step3.underIdea;
+    let ideaId = req.step3.unfderIdea;
     let step3Id = req.step3._id;
     let tbiReviewValue=req.body.value; 
     let value="0"; //value===not-verified/verified

@@ -29,7 +29,7 @@ const mentor_emails ={
     MBA:["mentora.mba@kiet.edu","mentorb.mba@kiet.edu","mentorc.mba@kiet.edu"]
   };
   const tbi_emails=[
-    "tbi1@kiet.edu","tbi2@kiet.edu","tbi3@kiet.edu","tbi4@kiet.edu"
+    "tbikiet@gmail.com","tbi1@kiet.edu","tbi2@kiet.edu","tbi3@kiet.edu","tbi4@kiet.edu"
   ];
 
 
