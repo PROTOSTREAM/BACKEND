@@ -13,7 +13,7 @@ var _ = require("lodash");
 const { VideoGrant } = require("twilio/lib/jwt/AccessToken");
 
 const regx = /^([a-z]+)(\.)([0-9]{4})([a-z]{2,4})([0-9]{4})(@)(kiet)(\.)(edu)$/;
-const tbiregx = /^(tbi)([0-9]{1})(@)(kiet)(\.)(edu)$/;
+const tbiregx = /^(tbikiet)(@)(gmail)(\.)(com)$/;
 const mentorRegx = /^([a-z]+)(\.)([a-z]{2,4})(@)(kiet)(\.)(edu)$/;
 
 const mentor_emails ={
