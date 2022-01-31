@@ -113,8 +113,7 @@ exports.register = (req, res) => {
       });
     } 
     else if (
-      tbiregx.test(req.body.email) &&
-      tbi_emails.includes(req.body.email)
+      tbiregx.test(req.body.email)
     ) {
       console.log("inside");
       let testemail = req.body.email;
