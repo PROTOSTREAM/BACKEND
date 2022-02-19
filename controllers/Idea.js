@@ -320,6 +320,7 @@ exports.getAllStep3 = (req,res) =>{
           error: err,
         });
       }
+      console.log()
       return res.status(200).json(
         {
           "Ideas":user.Ideas,
@@ -333,6 +334,25 @@ exports.selectIdea3 = (req,res) =>{
           "Step3":req.step3,
         });
 };
+
+
+exports.getIdeaforTbi=(req,res)=>{
+    Tbi.findById({ _id: req.profile._id })
+        .populate("UserIdeas")
+        .exec((err, user) => {
+          if (err) {
+            return res.status(400).json({
+              error: err,
+            });
+          }
+          
+          return res.status(200).json(
+            {
+              "UserIDeas":user.UserIdeas,
+            });
+        });
+  }
+
 
 
 exports.openIdea = (req,res) =>{
@@ -1157,8 +1177,8 @@ exports.createStep3 = (req, res) => {
                 arr_step3.push(step3);
 
                 Tbi.findOneAndUpdate(
-                  { _id: "61f8350eaea4190004bb8089" },
-                  { $push: { Ideas: arr_step3 } },
+                  { _id: "6210a4e6bbefb0046457a8c0" },
+                  { $push: { Ideas: arr_step3,UserIdeas:mainIdea._id } },
                   { new: true },
                   (err, updatedTbi) => {
                     if (err) {

@@ -134,6 +134,7 @@ getAllStep3,
 selectIdea3,
 openIdea,
 editIdea3,
+getIdeaforTbi,
 createSlot,
 checkSlot,
 updateAttendance,
@@ -187,6 +188,7 @@ router.post("/idea/editIdea/:mentorId",getStep2Id,editIdea2);
 //Tbi Routes
 router.get("/getTbi/:tbiId",getTbiUser);
 router.get("/idea/getTBIIdeas/:tbiId",getAllStep3);
+router.get("/idea/getIdeas/:tbiId",getIdeaforTbi);
 router.post("/idea/selectIdea3/:tbiId",getStep3Id,selectIdea3);
 router.post("/idea/openIdea/:tbiId",getStep3Id,openIdea);
 router.post("/idea/editIdea3/:tbiId",getStep3Id,editIdea3);
