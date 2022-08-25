@@ -16,21 +16,21 @@ const regx = /^([a-z]+)(\.)([0-9]{4})([a-z]{2,4})([0-9]{4})(@)(kiet)(\.)(edu)$/;
 const tbiregx = /^(tbikiet)(@)(gmail)(\.)(com)$/;
 const mentorRegx = /^([a-z]+)(\.)([a-z]{2,4})(@)(kiet)(\.)(edu)$/;
 
-const mentor_emails ={
-    CSE:["mentora.cse@kiet.edu","mentorb.cse@kiet.edu","mentorc.cse@kiet.edu"],
-    CS:["mentora.cs@kiet.edu","mentorb.cs@kiet.edu","mentorc.cs@kiet.edu"],
-    IT:["mentora.it@kiet.edu","mentorb.it@kiet.edu","mentorc.it@kiet.edu"],
-    CSIT:["mentora.csit@kiet.edu","mentorb.csit@kiet.edu","mentorc.csit@kiet.edu"],
-    EEE:["mentora.eee@kiet.edu","mentorb.eee@kiet.edu","mentorc.eee@kiet.edu"],
-    ECE:["mentora.ece@kiet.edu","mentorb.ece@kiet.edu","mentorc.ece@kiet.edu"],
-    ME:["mentora.me@kiet.edu","mentorb.me@kiet.edu","mentorc.me@kiet.edu"],
-    CE:["mentora.ce@kiet.edu","mentorb.ce@kiet.edu","mentorc.ce@kiet.edu"],
-    MCA:["mentora.mca@kiet.edu","mentorb.mca@kiet.edu","mentorc.mca@kiet.edu"],
-    MBA:["mentora.mba@kiet.edu","mentorb.mba@kiet.edu","mentorc.mba@kiet.edu"]
-  };
-  const tbi_emails=[
-    "tbikiet@gmail.com","tbi1@kiet.edu","tbi2@kiet.edu","tbi3@kiet.edu","tbi4@kiet.edu"
-  ];
+const mentor_emails = {
+  CSE: ["mentora.cse@kiet.edu", "mentorb.cse@kiet.edu", "mentorc.cse@kiet.edu"],
+  CS: ["mentora.cs@kiet.edu", "mentorb.cs@kiet.edu", "mentorc.cs@kiet.edu"],
+  IT: ["mentora.it@kiet.edu", "mentorb.it@kiet.edu", "mentorc.it@kiet.edu"],
+  CSIT: ["mentora.csit@kiet.edu", "mentorb.csit@kiet.edu", "mentorc.csit@kiet.edu"],
+  EEE: ["mentora.eee@kiet.edu", "mentorb.eee@kiet.edu", "mentorc.eee@kiet.edu"],
+  ECE: ["mentora.ece@kiet.edu", "mentorb.ece@kiet.edu", "mentorc.ece@kiet.edu"],
+  ME: ["mentora.me@kiet.edu", "mentorb.me@kiet.edu", "mentorc.me@kiet.edu"],
+  CE: ["mentora.ce@kiet.edu", "mentorb.ce@kiet.edu", "mentorc.ce@kiet.edu"],
+  MCA: ["mentora.mca@kiet.edu", "mentorb.mca@kiet.edu", "mentorc.mca@kiet.edu"],
+  MBA: ["mentora.mba@kiet.edu", "mentorb.mba@kiet.edu", "mentorc.mba@kiet.edu"]
+};
+const tbi_emails = [
+  "tbikiet@gmail.com", "tbi1@kiet.edu", "tbi2@kiet.edu", "tbi3@kiet.edu", "tbi4@kiet.edu"
+];
 
 
 exports.register = (req, res) => {
@@ -111,7 +111,7 @@ exports.register = (req, res) => {
           });
         }
       });
-    } 
+    }
     else if (
       tbiregx.test(req.body.email)
     ) {
@@ -157,8 +157,8 @@ exports.register = (req, res) => {
                   token,
                   cookies: res.cookies,
                   user: {
-                    _id,              
-                    email,                  
+                    _id,
+                    email,
                     profiledata,
                     role,
                     number,
@@ -223,8 +223,8 @@ exports.register = (req, res) => {
                   token,
                   cookies: res.cookies,
                   user: {
-                    _id,              
-                    email,                  
+                    _id,
+                    email,
                     profiledata,
                     department,
                     role,
@@ -247,18 +247,18 @@ exports.register = (req, res) => {
 };
 
 exports.login = (req, res) => {
-  
+
   console.log("in login route");
   const username = req.body.email;
   const password = req.body.password;
   console.log(username);
   console.log(password);
-  if(regx.test(req.body.email)){
+  if (regx.test(req.body.email)) {
     User.findOne({ email: username }, function (err, foundUser) {
       console.log("inside User find");
       if (err || !foundUser) {
-        console.log("error",err);
-        return res.status(400).json({
+        console.log("error", err);
+        return res.status(200).json({
           error: err || "User not found",
         });
       }
@@ -322,105 +322,88 @@ exports.login = (req, res) => {
       }
     });
   }
-  else if(tbiregx.test(req.body.email)){
-     TbiUser.findOne({ email: username }, function (err, foundUser) {
-    console.log("inside TBI find");
-    if (err || !foundUser) {
-      console.log("error",err);
-      return res.status(400).json({
-        error: err || "User not found",
-      });
-    }
-     else {
-       console.log("else case");
-      if (foundUser) {
-        // console.log("found user",foundUser);
-        bcrypt.compare(password, foundUser.password, function (err, result) {
-          if (result === true) {
-            const token = jwt.sign(
-              { _id: foundUser._id },
-              process.env.SECRET_KEY
-            );
-            // console.log(typeof token);
-            // res.cookie("hii", "hiiia");
-            console.log(req.cookies);
-            // res.cookie("token", token);
+  else if (tbiregx.test(req.body.email)) {
+    TbiUser.findOne({ email: username }, function (err, foundUser) {
+      console.log("inside TBI find");
+      if (err || !foundUser) {
+        console.log("error", err);
+        return res.status(400).json({
+          error: err || "User not found",
+        });
+      }
+      else {
+        console.log("else case");
+        if (foundUser) {
+          // console.log("found user",foundUser);
+          bcrypt.compare(password, foundUser.password, function (err, result) {
+            if (result === true) {
+              const token = jwt.sign(
+                { _id: foundUser._id },
+                process.env.SECRET_KEY
+              );
+              // console.log(typeof token);
+              // res.cookie("hii", "hiiia");
+              console.log(req.cookies);
+              // res.cookie("token", token);
 
-            const {
-              _id,           
-              email,
-              profiledata,
-              role,
-              number,
-            } = foundUser;
-            // console.log(res.headers);
-            // return res.send("sending response");
-
-            // req.profile = foundUser;
-            console.log("returning ");
-            return res.send({
-              token,
-              cookies: res.cookies,
-              user: {
+              const {
                 _id,
                 email,
                 profiledata,
                 role,
                 number,
-              },
-            });
-          } else {
-            return res.status(401).json({
-              error: "Email or password do not match",
-            });
-          }
+              } = foundUser;
+              // console.log(res.headers);
+              // return res.send("sending response");
+
+              // req.profile = foundUser;
+              console.log("returning ");
+              return res.send({
+                token,
+                cookies: res.cookies,
+                user: {
+                  _id,
+                  email,
+                  profiledata,
+                  role,
+                  number,
+                },
+              });
+            } else {
+              return res.status(401).json({
+                error: "Email or password do not match",
+              });
+            }
+          });
+        }
+      }
+    });
+  }
+  else if (mentorRegx.test(req.body.email)) {
+    MentorUser.findOne({ email: username }, function (err, foundUser) {
+      console.log("inside MENTOR find");
+      if (err || !foundUser) {
+        console.log("error", err);
+        return res.status(400).json({
+          error: err || "User not found",
         });
       }
-    }
-  });
-  }
-  else if(mentorRegx.test(req.body.email)){
-     MentorUser.findOne({ email: username }, function (err, foundUser) {
-    console.log("inside MENTOR find");
-    if (err || !foundUser) {
-      console.log("error",err);
-      return res.status(400).json({
-        error: err || "User not found",
-      });
-    }
-     else {
-       console.log("else case");
-      if (foundUser) {
-        // console.log("found user",foundUser);
-        bcrypt.compare(password, foundUser.password, function (err, result) {
-          if (result === true) {
-            const token = jwt.sign(
-              { _id: foundUser._id },
-              process.env.SECRET_KEY
-            );
-            // console.log(typeof token);
-            // res.cookie("hii", "hiiia");
-            console.log(req.cookies);
-            // res.cookie("token", token);
+      else {
+        console.log("else case");
+        if (foundUser) {
+          // console.log("found user",foundUser);
+          bcrypt.compare(password, foundUser.password, function (err, result) {
+            if (result === true) {
+              const token = jwt.sign(
+                { _id: foundUser._id },
+                process.env.SECRET_KEY
+              );
+              // console.log(typeof token);
+              // res.cookie("hii", "hiiia");
+              console.log(req.cookies);
+              // res.cookie("token", token);
 
-            const {
-              _id,           
-              email,
-              profiledata,
-              role,
-              department,
-              number,
-              Ideas,
-            } = foundUser;
-            // console.log(res.headers);
-            // return res.send("sending response");
-
-            // req.profile = foundUser;
-            console.log("returning ");
-            return res.send({
-              token,
-              cookies: res.cookies,
-              user: {
+              const {
                 _id,
                 email,
                 profiledata,
@@ -428,22 +411,39 @@ exports.login = (req, res) => {
                 department,
                 number,
                 Ideas,
-              },
-            });
-          } else {
-            return res.status(401).json({
-              error: "Email or password do not match",
-            });
-          }
-        });
+              } = foundUser;
+              // console.log(res.headers);
+              // return res.send("sending response");
+
+              // req.profile = foundUser;
+              console.log("returning ");
+              return res.send({
+                token,
+                cookies: res.cookies,
+                user: {
+                  _id,
+                  email,
+                  profiledata,
+                  role,
+                  department,
+                  number,
+                  Ideas,
+                },
+              });
+            } else {
+              return res.status(401).json({
+                error: "Email or password do not match",
+              });
+            }
+          });
+        }
       }
-    }
-  });
+    });
   }
-  else{
+  else {
     return res.status(401).json({
-              error: "Outsider not allowed",
-            });
+      error: "Outsider not allowed",
+    });
   }
 };
 
