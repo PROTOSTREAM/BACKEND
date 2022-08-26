@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Schema;
 
-
 const startupSchema = new mongoose.Schema(
   {
     StartupName: {
@@ -63,6 +62,7 @@ const startupSchema = new mongoose.Schema(
       type: ObjectId,
       ref: "User",
     },
+    teamMembers: [{ type: ObjectId, ref: "User" }],
   },
   { timestamps: true }
 );

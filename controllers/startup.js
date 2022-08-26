@@ -9,6 +9,30 @@ const client = require("twilio")(
   process.env.AUTH_TOKEN
 );
 
+exports.addNewMember = (req, res) => {
+  const startup = req.startup;
+  const teamMembers = req.body.teamMembers;
+  teamMembers.forEach((member) => {
+    User.findOne({ email: member }).exec((err, user) => {
+      if (err) {
+        return res.status(400).json({
+          error: "Unable to find user",
+        });
+      }
+      startup.teamMembers.push(user);
+    });
+  });
+
+  startup.save((err, result) => {
+    if (err) {
+      return res.status(400).json({
+        error: err,
+      });
+    }
+    return res.status(200).json(result);
+  });
+};
+
 exports.readytoRegister = (req, res) => {
   res.send({
     name: req.profile.profiledata.Profilename,
@@ -64,9 +88,7 @@ exports.otplogin = (req, res) => {
   }
 };
 
-
 exports.otpverify = (req, res) => {
-
   if (req.body.code.length === 6) {
     console.log("inside this");
     User.findOne({ email: req.profile.email }).exec((err, user) => {
@@ -84,26 +106,28 @@ exports.otpverify = (req, res) => {
           .then((data) => {
             const status = data.status;
             console.log(status);
-            if (status=== "approved") {
+            if (status === "approved") {
               res.status(200).send({ data });
               console.log("after sending..");
               User.findOneAndUpdate(
                 { _id: req.profile._id },
-                { phonestatus: data.status,role:1 },
-                {new: true},
+                { phonestatus: data.status, role: 1 },
+                { new: true },
                 function (err, result) {
                   if (err) {
                     console.log(err);
                   } else {
                     // console.log(result);
                   }
-                });
+                }
+              );
             } else {
               res.status(400).send({
                 err: "wrong code",
               });
             }
-          }).catch(err =>console.log(err));
+          })
+          .catch((err) => console.log(err));
       }
     });
   } else {
@@ -113,10 +137,9 @@ exports.otpverify = (req, res) => {
   }
 };
 
-
-exports.ndaUpload = (req,res) => {
+exports.ndaUpload = (req, res) => {
   console.log(req.profile.phonestatus);
-  if(req.profile.phonestatus==="approved"){
+  if (req.profile.phonestatus === "approved") {
     let uploadNda = fs.readFileSync(req.file.path);
     let encode_uploadNda = uploadNda.toString("base64");
     let final_uploadNda = {
@@ -125,7 +148,7 @@ exports.ndaUpload = (req,res) => {
       file: Buffer.from(encode_uploadNda, "base64"),
     };
     const { StartupName } = req.body;
-  
+
     const nda = new Nda({
       StartupName,
       Nda: final_uploadNda,
@@ -138,7 +161,7 @@ exports.ndaUpload = (req,res) => {
       }
       const NDA = [];
       NDA.push(nda);
-  
+
       User.findOneAndUpdate(
         { _id: req.profile._id },
         { $push: { ndas: NDA } },
@@ -154,18 +177,12 @@ exports.ndaUpload = (req,res) => {
         }
       );
     });
+  } else {
+    res.status(400).json({
+      error: "You have not proper register your phone no. for Startup!!",
+    });
   }
-  else{
-    res
-      .status(400)
-      .json({
-        error: "You have not proper register your phone no. for Startup!!",
-      });
-  }
-  
 };
-
-
 
 exports.getNdaById = (req, res, next, id) => {
   Nda.findById(id).exec((err, nda) => {
@@ -178,7 +195,6 @@ exports.getNdaById = (req, res, next, id) => {
     next();
   });
 };
-
 
 exports.getNda = (req, res) => {
   return res.json(req.nda);
@@ -244,7 +260,7 @@ exports.createNewStartup = (req, res) => {
     let presentationFile = fs.readFileSync(req.file.path);
     let encode_presentationFile = presentationFile.toString("base64");
     let final_presentationFile = {
-      path: req.file.path,  
+      path: req.file.path,
       contentType: req.file.mimetype,
       file: Buffer.from(encode_presentationFile, "base64"),
     };
@@ -285,7 +301,7 @@ exports.createNewStartup = (req, res) => {
           error: err,
         });
       }
-      startups=[]
+      startups = [];
       startups.push(startup);
       User.findOneAndUpdate(
         { _id: req.profile._id },
@@ -304,11 +320,9 @@ exports.createNewStartup = (req, res) => {
       );
     });
   } else {
-    res
-      .status(400)
-      .json({
-        error: "You have not proper register your phone no. for Startup!!",
-      });
+    res.status(400).json({
+      error: "You have not proper register your phone no. for Startup!!",
+    });
   }
 };
 
@@ -335,7 +349,7 @@ exports.internship = (req, res) => {
   });
 };
 
-exports.getStartupById = (req, res) => {
+exports.getStartupById = (req, res, next) => {
   User.findById({ _id: req.profile._id })
     .populate("startups")
     .exec((err, user) => {
@@ -344,8 +358,9 @@ exports.getStartupById = (req, res) => {
           error: err,
         });
       }
-
-      return res.status(200).json(user.startups);
+      req.startup = user.startups;
+      next();
+      // return res.status(200).json(user.startups);
     });
 };
 

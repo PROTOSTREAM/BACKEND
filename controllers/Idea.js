@@ -1177,7 +1177,7 @@ exports.createStep3 = (req, res) => {
                 arr_step3.push(step3);
 
                 Tbi.findOneAndUpdate(
-                  { _id: "630660256f7d505d5eb2f5ee" },
+                  { _id: "6307f4b79f28a044e877386a" },
                   { $push: { Ideas: arr_step3,UserIdeas:mainIdea._id } },
                   { new: true },
                   (err, updatedTbi) => {
