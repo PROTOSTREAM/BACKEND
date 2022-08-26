@@ -101,123 +101,153 @@ const multerStorage = multer.diskStorage({
 const upload = multer({ storage: multerStorage });
 
 const { getUserById, getUser } = require("../controllers/user");
-const { getMentorUserById, getMentorUser} = require("../controllers/mentors");
-const { getTbiUserById,getTbiUser } = require("../controllers/tbi");
-
-const { isSignedIn, isAuthenticated, isTBI, isMENTOR} = require("../controllers/auth");
+const { getMentorUserById, getMentorUser } = require("../controllers/mentors");
+const { getTbiUserById, getTbiUser } = require("../controllers/tbi");
 
 const {
-getTrlValues,
-updateTrlValues,
-createIdea,
-getIdeaOfUser,
-chooseBranch,
-getIdeaById,
-getIdea,
-deleteIdea,
-otplogin,
-otpverify,
-getStep2ById,
-getStep2,
-exportMentorandOpenForm,
-createStep2,
-getStep3ById,
-getStep3,
-exportStep2andOpenForm3,
-createStep3,
-getStep2Id,
-getAllStep2,
-selectIdea2,
-editIdea2,
-getStep3Id,
-getAllStep3,
-selectIdea3,
-openIdea,
-editIdea3,
-getIdeaforTbi,
-createSlot,
-checkSlot,
-updateAttendance,
-checkAttendanceSlot,
-ideaProgressPage,
-updateFeedback,
-updateComment,
-showAllFeedback,
-milestoneProgress
-} = require("../controllers/Idea");
+  isSignedIn,
+  isAuthenticated,
+  isTBI,
+  isMENTOR,
+} = require("../controllers/auth");
 
+const {
+  getTrlValues,
+  updateTrlValues,
+  createIdea,
+  getIdeaOfUser,
+  chooseBranch,
+  getIdeaById,
+  getIdea,
+  deleteIdea,
+  otplogin,
+  otpverify,
+  getStep2ById,
+  getStep2,
+  exportMentorandOpenForm,
+  createStep2,
+  getStep3ById,
+  getStep3,
+  exportStep2andOpenForm3,
+  createStep3,
+  getStep2Id,
+  getAllStep2,
+  selectIdea2,
+  editIdea2,
+  getStep3Id,
+  getAllStep3,
+  selectIdea3,
+  openIdea,
+  editIdea3,
+  getIdeaforTbi,
+  createSlot,
+  checkSlot,
+  updateAttendance,
+  checkAttendanceSlot,
+  ideaProgressPage,
+  updateFeedback,
+  updateComment,
+  showAllFeedback,
+  milestoneProgress,
+} = require("../controllers/Idea");
+const { getStartupById, addNewMember } = require("../controllers/startup");
 
 const router = express.Router();
 
 //params
-router.param("userId", getUserById,getIdeaById,getStep2ById,getStep3ById);
-router.param("mentorId",getMentorUserById,getStep2Id);
-router.param("tbiId",getTbiUserById,getStep3Id);
-
+router.param("userId", getUserById, getIdeaById, getStep2ById, getStep3ById);
+router.param("mentorId", getMentorUserById, getStep2Id);
+router.param("tbiId", getTbiUserById, getStep3Id);
+router.param("startupId", getStartupById);
 
 //user routes
-router.get("/getIdea/:userId",isSignedIn,getIdeaById,getIdea);
+router.get("/getIdea/:userId", isSignedIn, getIdeaById, getIdea);
 
-router.get("/getTrl/:userId",isSignedIn, getTrlValues);
-router.post("/updateTrl/:userId",isSignedIn, updateTrlValues);
+router.get("/getTrl/:userId", isSignedIn, getTrlValues);
+router.post("/updateTrl/:userId", isSignedIn, updateTrlValues);
 
-router.post("/createIdea/:userId",isSignedIn, createIdea);
+router.post("/createIdea/:userId", isSignedIn, createIdea);
 
-router.post("/idea/chooseBranch/:userId",isSignedIn, getIdeaById,chooseBranch);
+router.post(
+  "/idea/chooseBranch/:userId",
+  isSignedIn,
+  getIdeaById,
+  chooseBranch
+);
 
-router.get("/idea/otplogin/:userId",isSignedIn,getIdeaById, otplogin);
-router.post("/idea/otpverify/:userId",isSignedIn,getIdeaById, otpverify);
+router.get("/idea/otplogin/:userId", isSignedIn, getIdeaById, otplogin);
+router.post("/idea/otpverify/:userId", isSignedIn, getIdeaById, otpverify);
 
-router.get("/idea/clickStep2/:userId",isSignedIn,getIdeaById,getStep2ById,exportMentorandOpenForm);
-router.post("/idea/createStep2/:userId",isSignedIn,getIdeaById,getStep2ById,createStep2);
-router.get("/idea/getStep2/:userId",isSignedIn,getStep2ById,getStep2);
+router.get(
+  "/idea/clickStep2/:userId",
+  isSignedIn,
+  getIdeaById,
+  getStep2ById,
+  exportMentorandOpenForm
+);
+router.post(
+  "/idea/createStep2/:userId",
+  isSignedIn,
+  getIdeaById,
+  getStep2ById,
+  createStep2
+);
+router.get("/idea/getStep2/:userId", isSignedIn, getStep2ById, getStep2);
 
-router.get("/idea/clickStep3/:userId",isSignedIn,getIdeaById,getStep3ById,exportStep2andOpenForm3);
-router.post("/idea/createStep3/:userId",isSignedIn,getIdeaById,getStep3ById,createStep3);
-router.get("/idea/getStep3/:userId",isSignedIn,getStep3ById,getStep3);
+router.get(
+  "/idea/clickStep3/:userId",
+  isSignedIn,
+  getIdeaById,
+  getStep3ById,
+  exportStep2andOpenForm3
+);
+router.post(
+  "/idea/createStep3/:userId",
+  isSignedIn,
+  getIdeaById,
+  getStep3ById,
+  createStep3
+);
+router.get("/idea/getStep3/:userId", isSignedIn, getStep3ById, getStep3);
 
-router.get("/idea/dropIdea/:userId",isSignedIn,getIdeaById, deleteIdea);
+router.get("/idea/dropIdea/:userId", isSignedIn, getIdeaById, deleteIdea);
 
+router.post("/startup/addMembers/:startupId", isSignedIn, addNewMember);
 
 //Mentor Routes
-router.get("/getMentor/:mentorId",getMentorUser);
-router.get("/idea/getMENTORIdeas/:mentorId",getAllStep2);
-router.post("/idea/selectIdea/:mentorId",getStep2Id,selectIdea2);
-router.post("/idea/editIdea/:mentorId",getStep2Id,editIdea2);
+router.get("/getMentor/:mentorId", getMentorUser);
+router.get("/idea/getMENTORIdeas/:mentorId", getAllStep2);
+router.post("/idea/selectIdea/:mentorId", getStep2Id, selectIdea2);
+router.post("/idea/editIdea/:mentorId", getStep2Id, editIdea2);
 
 //Tbi Routes
-router.get("/getTbi/:tbiId",getTbiUser);
-router.get("/idea/getTBIIdeas/:tbiId",getAllStep3);
-router.get("/idea/getIdeas/:tbiId",getIdeaforTbi);
-router.post("/idea/selectIdea3/:tbiId",getStep3Id,selectIdea3);
-router.post("/idea/openIdea/:tbiId",getStep3Id,openIdea);
-router.post("/idea/editIdea3/:tbiId",getStep3Id,editIdea3);
-router.post("/idea/createSlot/:tbiId",getStep3Id,createSlot);
-router.post("/idea/checkSlot/:tbiId",checkSlot);
-router.post("/idea/checkAttendanceSlot/:tbiId",checkAttendanceSlot);
-router.post("/idea/updateAttendance/:tbiId",getStep3Id,updateAttendance);
-
+router.get("/getTbi/:tbiId", getTbiUser);
+router.get("/idea/getTBIIdeas/:tbiId", getAllStep3);
+router.get("/idea/getIdeas/:tbiId", getIdeaforTbi);
+router.post("/idea/selectIdea3/:tbiId", getStep3Id, selectIdea3);
+router.post("/idea/openIdea/:tbiId", getStep3Id, openIdea);
+router.post("/idea/editIdea3/:tbiId", getStep3Id, editIdea3);
+router.post("/idea/createSlot/:tbiId", getStep3Id, createSlot);
+router.post("/idea/checkSlot/:tbiId", checkSlot);
+router.post("/idea/checkAttendanceSlot/:tbiId", checkAttendanceSlot);
+router.post("/idea/updateAttendance/:tbiId", getStep3Id, updateAttendance);
 
 //Startup Routes
 
-router.get("/startup/getStartup/user/:userId",ideaProgressPage);
-router.get("/startup/getStartup/tbi/:tbiId",ideaProgressPage);
-router.get("/startup/getStartup/mentor/:mentorId",ideaProgressPage);
+router.get("/startup/getStartup/user/:userId", ideaProgressPage);
+router.get("/startup/getStartup/tbi/:tbiId", ideaProgressPage);
+router.get("/startup/getStartup/mentor/:mentorId", ideaProgressPage);
 
-router.post("/startup/updateFeedback/:userId",updateFeedback);
-router.post("/startup/updateComment/:tbiId",updateComment);
+router.post("/startup/updateFeedback/:userId", updateFeedback);
+router.post("/startup/updateComment/:tbiId", updateComment);
 
-router.post("/startup/showFeedbacks/:tbiId",showAllFeedback);
+router.post("/startup/showFeedbacks/:tbiId", showAllFeedback);
 
-router.post("/startup/milestone/student/:userId",milestoneProgress);
-router.post("/startup/milestone/tbi/:tbiId",milestoneProgress);
-router.post("/startup/milestone/mentor/:mentorId",milestoneProgress);
-
+router.post("/startup/milestone/student/:userId", milestoneProgress);
+router.post("/startup/milestone/tbi/:tbiId", milestoneProgress);
+router.post("/startup/milestone/mentor/:mentorId", milestoneProgress);
 
 module.exports = router;
-
-
-
 
 // router.post(
 //   "/startup/nda/upload/:userId",
@@ -226,7 +256,6 @@ module.exports = router;
 //   isSignedIn,
 //   ndaUpload
 // );
-
 
 // REGISTER ROUTES
 // router.post(
