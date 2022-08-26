@@ -2,6 +2,7 @@ require("dotenv").config();
 const User = require("../models/user");
 const TbiUser = require("../models/tbi");
 const MentorUser = require("../models/mentors");
+const ExternalUser = require("../models/externalUser");
 const mongoose = require("mongoose");
 const expressJwt = require("express-jwt");
 
@@ -15,6 +16,8 @@ const { VideoGrant } = require("twilio/lib/jwt/AccessToken");
 const regx = /^([a-z]+)(\.)([0-9]{4})([a-z]{2,4})([0-9]{4})(@)(kiet)(\.)(edu)$/;
 const tbiregx = /^(tbikiet)(@)(gmail)(\.)(com)$/;
 const mentorRegx = /^([a-z]+)(\.)([a-z]{2,4})(@)(kiet)(\.)(edu)$/;
+const externalUser = /^([a-zA-Z0-9_]*)(@)(gmail)(\.)(com)$/;
+
 
 const mentor_emails = {
   CSE: [
@@ -241,7 +244,62 @@ exports.register = (req, res) => {
         }
       });
     }
-  } else {
+  } 
+  else if(externalUser.test(req.body.email)){
+    console.log("inside");
+    let testemail = req.body.email;
+    let data = _.capitalize(testemail).split("@");
+    let proname = data[0];
+    let profiledata = {
+      Profilename: proname,
+    };
+    ExternalUser.findOne({ email: req.body.email }, function (err, foundUser) {
+      // console.log("[Found User]",foundUser);
+      if (foundUser) {
+        return res.json({ error: "Email already registered" });
+      } else {
+        bcrypt.hash(req.body.password, saltRounds, function (err, hash) {
+          const newUser = new ExternalUser({
+            email: req.body.email,
+            password: hash,
+            profiledata: profiledata,
+            role: 5,
+            number: req.body.number,
+          });
+
+          newUser.save(function (err, savedUser) {
+            // console.log("[SavedUser]",savedUser);
+            if (!err) {
+              const token = jwt.sign(
+                { _id: newUser._id },
+                process.env.SECRET_KEY
+              );
+              res.cookie("token", token, { expire: new Date() + 7 });
+              const { _id, email, profiledata, role, number } = savedUser;
+
+              return res.send({
+                token,
+                cookies: res.cookies,
+                user: {
+                  _id,
+                  email,
+                  profiledata,
+                  role,
+                  number,
+                },
+              });
+            } else {
+              return res.status(400).json({
+                error: err,
+              });
+            }
+          });
+        });
+      }
+    });
+
+  }
+  else {
     return res.status(400).json("Invalid Email id");
   }
 };
